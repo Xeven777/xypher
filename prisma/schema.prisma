@@ -6,3 +6,18 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model Passwords {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String
+  createdAt DateTime @default(now())
+  password  String
+  title     String
+  category  String
+  userName  String?
+  url       String?
+  notes     String?
+  email     String?
+
+  @@map("passwords")
+}
