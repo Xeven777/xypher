@@ -1,16 +1,16 @@
-import { auth } from "@/auth";
-import { SignIn } from "@/components/signin";
+import { LoginLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
-export default async function Page() {
-  const session = await auth();
-  if (!session) return <div>Not authenticated</div>;
+export default async function Protected() {
+  const { isAuthenticated } = getKindeServerSession();
 
-  return (
+  return (await isAuthenticated()) ? (
     <div>
-      <pre>
-        {JSON.stringify(session, null, 2)}
-        <SignIn />
-      </pre>
+      This page is protected - but you can view it because you are authenticated
+    </div>
+  ) : (
+    <div>
+      This page is protected, please <LoginLink>Login</LoginLink> to view it
     </div>
   );
 }
