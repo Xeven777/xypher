@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/header";
+import { Toaster } from "@/components/ui/sonner";
 
 const fonty = Sora({ subsets: ["latin"] });
 
@@ -16,10 +17,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body className={fonty.className + " relative"}>
         <Navbar />
         <div className="mx-auto max-w-6xl">{children}</div>
+        <Toaster richColors position="top-center" theme="dark" />
       </body>
     </html>
   );

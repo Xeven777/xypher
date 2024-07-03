@@ -20,7 +20,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { FilePenIcon, SearchIcon, TrashIcon } from "lucide-react";
+import {
+  Copy,
+  FilePenIcon,
+  SearchIcon,
+  Sparkles,
+  TrashIcon,
+} from "lucide-react";
 import CheckboxComponent from "@/components/ui/checkbox2";
 import {
   Accordion,
@@ -38,6 +44,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 export default function Component() {
   const [passwords, setPasswords] = useState([
@@ -71,10 +78,11 @@ export default function Component() {
     },
   ]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [numbers, setNumbers] = useState(false);
+  const [numbers, setNumbers] = useState(true);
   const [symbols, setSymbols] = useState(false);
-  const [uppercase, setUppercase] = useState(false);
-  const [length, setLength] = useState(8);
+  const [uppercase, setUppercase] = useState(true);
+  const [category, setCategory] = useState("Login");
+  const [length, setLength] = useState([8]);
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const filteredPasswords = useMemo(() => {
@@ -92,7 +100,7 @@ export default function Component() {
 
   const generatePw = () => {
     const pw = generate({
-      length: length,
+      length: length[0],
       numbers: numbers,
       symbols: symbols,
       uppercase: uppercase,
@@ -129,7 +137,7 @@ export default function Component() {
                 <DialogTrigger>Open</DialogTrigger>
               </Button>
               <DialogContent className="bg-background px-4 py-6 rounded-md shadow-lg">
-                <ScrollArea className="max-h-[95svh] w-full">
+                <ScrollArea className="max-h-[88svh] border-b rounded-md w-full">
                   <DialogHeader>
                     <DialogTitle>Add Password</DialogTitle>
                     <DialogDescription>
@@ -161,23 +169,51 @@ export default function Component() {
                         <Input id="username" placeholder="Enter a username" />
                       </div>
 
-                      <div>
-                        <Label htmlFor="password-password">Password</Label>
+                      <div className="relative">
+                        <Label htmlFor="password">Password</Label>
                         <Input
-                          id="password-password"
+                          id="password"
                           value={generatedPassword}
-                          readOnly
+                          onChange={(e) => {
+                            setGeneratedPassword(e.target.value);
+                          }}
                         />
-                        <Button variant="outline" onClick={generatePw}>
-                          Generate
+                        <Button
+                          size={"icon"}
+                          variant={"ghost"}
+                          title="Copy Password"
+                          className="rounded-full active:rotate-6 hover:animate-pulse transition-all duration-300 absolute right-10 top-6"
+                          onClick={() => {
+                            navigator.clipboard.writeText(generatedPassword);
+                            toast.success("Password copied to clipboard");
+                          }}
+                        >
+                          <Copy size={18} color={"#bee5cb"} />
+                        </Button>
+                        <Button
+                          size={"icon"}
+                          title="Generate Password"
+                          className="rounded-full active:rotate-6 hover:animate-pulse transition-all duration-300 absolute right-0 top-6"
+                          onClick={generatePw}
+                        >
+                          <Sparkles size={20} />
                         </Button>
                       </div>
                       <div>
-                        <Label htmlFor="length">Length</Label>
+                        <Label htmlFor="length">
+                          Length{" "}
+                          <span className="text-muted-foreground text-xs">
+                            {" "}
+                            = {length}
+                          </span>
+                        </Label>
                         <Slider
                           id="length"
                           defaultValue={[8]}
-                          max={25}
+                          value={length}
+                          onValueChange={setLength}
+                          min={4}
+                          max={30}
                           step={1}
                         />
                         <Accordion type="single" collapsible>
@@ -195,6 +231,8 @@ export default function Component() {
                                     <input
                                       className="peer absolute h-0 w-0 opacity-0"
                                       type="checkbox"
+                                      checked={uppercase}
+                                      onChange={() => setUppercase(!uppercase)}
                                     />
                                     <span className="checkboxdesign" />
                                   </label>
@@ -205,6 +243,8 @@ export default function Component() {
                                     <input
                                       className="peer absolute h-0 w-0 opacity-0"
                                       type="checkbox"
+                                      checked={symbols}
+                                      onChange={() => setSymbols(!symbols)}
                                     />
                                     <span className="checkboxdesign" />
                                   </label>
@@ -215,6 +255,8 @@ export default function Component() {
                                     <input
                                       className="peer absolute h-0 w-0 opacity-0"
                                       type="checkbox"
+                                      checked={numbers}
+                                      onChange={() => setNumbers(!numbers)}
                                     />
                                     <span className="checkboxdesign" />
                                   </label>
@@ -226,9 +268,12 @@ export default function Component() {
                       </div>
                       <div>
                         <Label htmlFor="category">Category</Label>
-                        <Select>
+                        <Select
+                          onValueChange={setCategory}
+                          defaultValue={"Login"}
+                        >
                           <SelectTrigger>
-                            <SelectValue placeholder="Choose" />
+                            <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="Login">Login</SelectItem>
@@ -363,80 +408,6 @@ export default function Component() {
           </Table>
         </div>
       </main>
-      {/* {showPasswordGenerator && (
-        <Dialog
-          open={showPasswordGenerator}
-          onOpenChange={setShowPasswordGenerator}
-        >
-          <DialogContent className="bg-background p-6 rounded-md shadow-lg">
-            <DialogHeader>
-              <DialogTitle>Generate Password</DialogTitle>
-              <DialogDescription>
-                Use the generated password or create your own.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex items-center justify-between mb-4">
-              <Input
-                type="text"
-                value={generatedPassword}
-                readOnly
-                className="pr-12 bg-muted text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              <Button variant="outline" onClick={generatePassword}>
-                Generate
-              </Button>
-            </div>
-            <div className="grid gap-4">
-              <div>
-                <Label htmlFor="password-name">Name</Label>
-                <Input id="password-name" placeholder="Enter a name" />
-              </div>
-              <div>
-                <Label htmlFor="password-username">Username</Label>
-                <Input id="password-username" placeholder="Enter a username" />
-              </div>
-              <div>
-                <Label htmlFor="password-password">Password</Label>
-                <Input
-                  id="password-password"
-                  value={generatedPassword}
-                  readOnly
-                />
-              </div>
-              <div>
-                <Label htmlFor="password-category">Category</Label>
-                <Input id="password-category" placeholder="Enter a category" />
-              </div>
-            </div>
-            <div className="flex justify-end mt-4 gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowPasswordGenerator(false);
-                  setGeneratedPassword("");
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  addPassword({
-                    id: passwords.length + 1,
-                    name: "New Password",
-                    username: "new@example.com",
-                    password: generatedPassword,
-                    category: "New Category",
-                  });
-                  setShowPasswordGenerator(false);
-                  setGeneratedPassword("");
-                }}
-              >
-                Save
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )} */}
     </div>
   );
 }
