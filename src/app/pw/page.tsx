@@ -139,7 +139,9 @@ export default function Component() {
         password?.title.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => {
+        // @ts-expect-error
         if (a![sortBy] < b![sortBy]) return sortOrder === "asc" ? -1 : 1;
+        // @ts-expect-error
         if (a![sortBy] > b![sortBy]) return sortOrder === "asc" ? 1 : -1;
         return 0;
       });
