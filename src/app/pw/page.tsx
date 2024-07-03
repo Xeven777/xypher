@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,41 +45,66 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import addPassword from "@/actions/prisma";
+import { addPassword, fetchPasswords } from "@/actions/prisma";
 import { Textarea } from "@/components/ui/textarea";
+type PasswordKey =
+  | "id"
+  | "userId"
+  | "createdAt"
+  | "password"
+  | "title"
+  | "category"
+  | "userName"
+  | "url"
+  | "notes"
+  | "email";
+type Password = {
+  id: string;
+  userId: string;
+  createdAt: Date;
+  password: string;
+  title: string;
+  category: string;
+  userName: string | null;
+  url: string | null;
+  notes: string | null;
+  email: string | null;
+};
 
 export default function Component() {
+  // const [passwords, setPasswords] = useState([
+  //   {
+  //     id: 1,
+  //     name: "Gmail",
+  //     username: "john@example.com",
+  //     password: "Ht8$2Kd9",
+  //     category: "Email",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Netflix",
+  //     username: "john123",
+  //     password: "Qp7#Lm4F",
+  //     category: "Entertainment",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Bank of America",
+  //     username: "johnsmith",
+  //     password: "Xt9!Zw2P",
+  //     category: "Finance",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "Amazon",
+  //     username: "john.doe",
+  //     password: "Mj5@Fy6B",
+  //     category: "Shopping",
+  //   },
+  // ]);
 
-  const [passwords, setPasswords] = useState([
-    {
-      id: 1,
-      name: "Gmail",
-      username: "john@example.com",
-      password: "Ht8$2Kd9",
-      category: "Email",
-    },
-    {
-      id: 2,
-      name: "Netflix",
-      username: "john123",
-      password: "Qp7#Lm4F",
-      category: "Entertainment",
-    },
-    {
-      id: 3,
-      name: "Bank of America",
-      username: "johnsmith",
-      password: "Xt9!Zw2P",
-      category: "Finance",
-    },
-    {
-      id: 4,
-      name: "Amazon",
-      username: "john.doe",
-      password: "Mj5@Fy6B",
-      category: "Shopping",
-    },
-  ]);
+  const [passwords, setPasswords] = useState<Password[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [numbers, setNumbers] = useState(true);
   const [title, setTitle] = useState("");
@@ -92,17 +117,30 @@ export default function Component() {
   const [uppercase, setUppercase] = useState(true);
   const [category, setCategory] = useState("Login");
   const [length, setLength] = useState([8]);
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState<PasswordKey>("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const [generatedPassword, setGeneratedPassword] = useState("");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const fetchedPasswords = await fetchPasswords();
+      if (!fetchedPasswords) {
+        return;
+      }
+      setPasswords(fetchedPasswords);
+      setLoading(false);
+    };
+    fetchData();
+  }, []);
+
   const filteredPasswords = useMemo(() => {
     return passwords
       .filter((password) =>
-        password.name.toLowerCase().includes(searchTerm.toLowerCase())
+        password?.title.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => {
-        if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1;
-        if (a[sortBy] > b[sortBy]) return sortOrder === "asc" ? 1 : -1;
+        if (a![sortBy] < b![sortBy]) return sortOrder === "asc" ? -1 : 1;
+        if (a![sortBy] > b![sortBy]) return sortOrder === "asc" ? 1 : -1;
         return 0;
       });
   }, [passwords, searchTerm, sortBy, sortOrder]);
@@ -131,11 +169,16 @@ export default function Component() {
           setPasswords([
             ...passwords,
             {
-              id: passwords.length + 1,
-              name: title,
-              username: username,
+              title: title,
+              userName: username,
               password: generatedPassword,
               category: category,
+              email: email,
+              notes: notes,
+              url: url,
+              id: result.id,
+              userId: result.userId,
+              createdAt: result.createdAt,
             },
           ]);
           setTitle("");
@@ -393,12 +436,12 @@ export default function Component() {
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => {
-                    setSortBy("name");
+                    setSortBy("title");
                     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
                   }}
                 >
                   Name{" "}
-                  {sortBy === "name" && (
+                  {sortBy === "title" && (
                     <span className="ml-1">
                       {sortOrder === "asc" ? "\u2191" : "\u2193"}
                     </span>
@@ -407,12 +450,12 @@ export default function Component() {
                 <TableHead
                   className="cursor-pointer"
                   onClick={() => {
-                    setSortBy("username");
+                    setSortBy("userName");
                     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
                   }}
                 >
                   Username{" "}
-                  {sortBy === "username" && (
+                  {sortBy === "userName" && (
                     <span className="ml-1">
                       {sortOrder === "asc" ? "\u2191" : "\u2193"}
                     </span>
@@ -438,8 +481,10 @@ export default function Component() {
             <TableBody>
               {filteredPasswords.map((password) => (
                 <TableRow key={password.id}>
-                  <TableCell className="font-medium">{password.name}</TableCell>
-                  <TableCell>{password.username}</TableCell>
+                  <TableCell className="font-medium">
+                    {password.title}
+                  </TableCell>
+                  <TableCell>{password.userName}</TableCell>
                   <TableCell>{password.category}</TableCell>
                   <TableCell className="text-right">
                     <Button

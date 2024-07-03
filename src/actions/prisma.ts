@@ -3,9 +3,8 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
-const addPassword = async (passwordData: {
+export const addPassword = async (passwordData: {
   title: string;
   username: string;
   password: string;
@@ -14,6 +13,7 @@ const addPassword = async (passwordData: {
   notes?: string;
   url?: string;
 }) => {
+  console.log("Addin ", passwordData.title, "to the database.");
   const prisma = new PrismaClient();
   const { getUser } = getKindeServerSession();
   const user = await getUser();
@@ -35,13 +35,32 @@ const addPassword = async (passwordData: {
       },
     });
     console.log("Password saved:", result);
+    revalidatePath("/pw");
     return result;
   } catch (error) {
     console.error("Failed to save password:", error);
     return null;
   }
-  revalidatePath("/pw");
-  redirect("/pw");
 };
 
-export default addPassword;
+export const fetchPasswords = async () => {
+  const prisma = new PrismaClient();
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  try {
+    const passwords = await prisma.passwords.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+    console.log("Passwords fetched:", passwords);
+    return passwords;
+  } catch (error) {
+    console.error("Failed to fetch passwords:", error);
+    return null;
+  }
+};
