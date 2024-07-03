@@ -6,7 +6,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -15,7 +14,6 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 const Navbar = async () => {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
-  console.log(user);
   return (
     <header className="sticky bg-background/20 border-b backdrop-blur-md p-2 w-full top-0 z-50">
       <nav className="w-full max-w-6xl mx-auto flex items-center justify-between">

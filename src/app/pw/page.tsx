@@ -20,10 +20,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 import { FilePenIcon, SearchIcon, TrashIcon } from "lucide-react";
 import CheckboxComponent from "@/components/ui/checkbox2";
-import { TextureButton } from "@/components/ui/texture-button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { generate } from "generate-password-browser";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -33,6 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function Component() {
   const [passwords, setPasswords] = useState([
@@ -66,6 +71,10 @@ export default function Component() {
     },
   ]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [numbers, setNumbers] = useState(false);
+  const [symbols, setSymbols] = useState(false);
+  const [uppercase, setUppercase] = useState(false);
+  const [length, setLength] = useState(8);
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
   const filteredPasswords = useMemo(() => {
@@ -83,11 +92,10 @@ export default function Component() {
 
   const generatePw = () => {
     const pw = generate({
-      length: 12,
-      numbers: true,
-      symbols: true,
-      uppercase: true,
-      strict: true,
+      length: length,
+      numbers: numbers,
+      symbols: symbols,
+      uppercase: uppercase,
     });
     setGeneratedPassword(pw);
   };
@@ -102,8 +110,7 @@ export default function Component() {
     setPasswords(passwords.filter((p) => p.id !== id));
   };
   return (
-    <div className="flex flex-col h-screen">
-      
+    <div className="flex flex-col min-h-svh">
       <main className="flex-1 bg-background p-6">
         <div className="flex justify-between items-center mb-4">
           <div className="relative w-full max-w-md">
@@ -121,83 +128,150 @@ export default function Component() {
               <Button asChild>
                 <DialogTrigger>Open</DialogTrigger>
               </Button>
-              <DialogContent className="bg-background p-6 rounded-md shadow-lg">
-                <DialogHeader>
-                  <DialogTitle>Add Password</DialogTitle>
-                  <DialogDescription>
-                    Use the generated password or create your own.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="flex items-center justify-between mb-4">
-                  <Input type="text" value={generatedPassword} readOnly />
-                  <Button size={"sm"} onClick={generatePw}>
-                    Generate
-                  </Button>
-                </div>
-                <CheckboxComponent />
-                <div className="grid gap-4">
-                  <div>
-                    <Label htmlFor="password-name">Name</Label>
-                    <Input id="password-name" placeholder="Enter a name" />
-                  </div>
+              <DialogContent className="bg-background px-4 py-6 rounded-md shadow-lg">
+                <ScrollArea className="max-h-[95svh] w-full">
+                  <DialogHeader>
+                    <DialogTitle>Add Password</DialogTitle>
+                    <DialogDescription>
+                      Use the generated password or create your own.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-2 px-2 mt-4 justify-center">
+                    <div className="flex flex-col gap-1 items-start mb-4">
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        type="text"
+                        id="title"
+                        placeholder="Add a title.."
+                      />
+                    </div>
 
-                  <div>
-                    <Label htmlFor="password-username">Username</Label>
-                    <Input
-                      id="password-username"
-                      placeholder="Enter a username"
-                    />
+                    <div className="grid gap-4">
+                      <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="Enter a Email"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="username">Username</Label>
+                        <Input id="username" placeholder="Enter a username" />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="password-password">Password</Label>
+                        <Input
+                          id="password-password"
+                          value={generatedPassword}
+                          readOnly
+                        />
+                        <Button variant="outline" onClick={generatePw}>
+                          Generate
+                        </Button>
+                      </div>
+                      <div>
+                        <Label htmlFor="length">Length</Label>
+                        <Slider
+                          id="length"
+                          defaultValue={[8]}
+                          max={25}
+                          step={1}
+                        />
+                        <Accordion type="single" collapsible>
+                          <AccordionItem value="item-1">
+                            <AccordionTrigger>
+                              <p className="text-xs text-muted-foreground">
+                                Advanced Settings
+                              </p>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <div className="flex justify-around flex-wrap">
+                                <div className="flex gap-1 p-1">
+                                  Uppercase
+                                  <label className="checkboxlabel">
+                                    <input
+                                      className="peer absolute h-0 w-0 opacity-0"
+                                      type="checkbox"
+                                    />
+                                    <span className="checkboxdesign" />
+                                  </label>
+                                </div>
+                                <div className="flex gap-1 p-1">
+                                  Symbols
+                                  <label className="checkboxlabel">
+                                    <input
+                                      className="peer absolute h-0 w-0 opacity-0"
+                                      type="checkbox"
+                                    />
+                                    <span className="checkboxdesign" />
+                                  </label>
+                                </div>
+                                <div className="flex gap-1 p-1">
+                                  Numbers
+                                  <label className="checkboxlabel">
+                                    <input
+                                      className="peer absolute h-0 w-0 opacity-0"
+                                      type="checkbox"
+                                    />
+                                    <span className="checkboxdesign" />
+                                  </label>
+                                </div>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+                      </div>
+                      <div>
+                        <Label htmlFor="category">Category</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Login">Login</SelectItem>
+                            <SelectItem value="Education">Education</SelectItem>
+                            <SelectItem value="Software">Software</SelectItem>
+                            <SelectItem value="Finance">Finance</SelectItem>
+                            <SelectItem value="Shopping">Shopping</SelectItem>
+                            <SelectItem value="Email">Email</SelectItem>
+                            <SelectItem value="Entertainment">
+                              Entertainment
+                            </SelectItem>
+                            <SelectItem value="Social">Social</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end mt-4 gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setGeneratedPassword("");
+                        }}
+                      >
+                        Reset
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          addPassword({
+                            id: passwords.length + 1,
+                            name: "New Password",
+                            username: "new@example.com",
+                            password: generatedPassword,
+                            category: "New Category",
+                          });
+                          setGeneratedPassword("");
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="password-password">Password</Label>
-                    <Input
-                      id="password-password"
-                      value={generatedPassword}
-                      readOnly
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="length">Length</Label>
-                    <Slider id="length" defaultValue={[8]} max={25} step={1} />
-                  </div>
-                  <div>
-                    <Label htmlFor="category">Category</Label>
-                    <Select>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Theme" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="system">System</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="flex justify-end mt-4 gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setGeneratedPassword("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      addPassword({
-                        id: passwords.length + 1,
-                        name: "New Password",
-                        username: "new@example.com",
-                        password: generatedPassword,
-                        category: "New Category",
-                      });
-                      setGeneratedPassword("");
-                    }}
-                  >
-                    Save
-                  </Button>
-                </div>
+                </ScrollArea>
               </DialogContent>
             </Dialog>
 
