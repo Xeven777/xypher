@@ -17,8 +17,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 export default function Component() {
   const [passwords, setPasswords] = useState([
@@ -104,25 +106,92 @@ export default function Component() {
             />
           </div>
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               variant="outline"
               onClick={() => setShowPasswordGenerator(true)}
             >
               Generate Password
-            </Button>
-            <Button
-              onClick={() =>
-                addPassword({
-                  id: passwords.length + 1,
-                  name: "",
-                  username: "",
-                  password: "",
-                  category: "",
-                })
-              }
-            >
-              Add Password
-            </Button>
+            </Button> */}
+            <Dialog>
+              <DialogTrigger>
+                <Button>Open</Button>
+              </DialogTrigger>
+              <DialogContent className="bg-background p-6 rounded-md shadow-lg">
+                <DialogHeader>
+                  <DialogTitle>Generate Password</DialogTitle>
+                  <DialogDescription>
+                    Use the generated password or create your own.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex items-center justify-between mb-4">
+                  <Input
+                    type="text"
+                    value={generatedPassword}
+                    readOnly
+                    className="pr-12 bg-muted text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                  <Button variant="outline" onClick={generatePassword}>
+                    Generate
+                  </Button>
+                </div>
+                <div className="grid gap-4">
+                  <div>
+                    <Label htmlFor="password-name">Name</Label>
+                    <Input id="password-name" placeholder="Enter a name" />
+                  </div>
+                  <div>
+                    <Label htmlFor="password-username">Username</Label>
+                    <Input
+                      id="password-username"
+                      placeholder="Enter a username"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="password-password">Password</Label>
+                    <Input
+                      id="password-password"
+                      value={generatedPassword}
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="password-category">Category</Label>
+                    <Input
+                      id="password-category"
+                      placeholder="Enter a category"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-4 gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowPasswordGenerator(false);
+                      setGeneratedPassword("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      addPassword({
+                        id: passwords.length + 1,
+                        name: "New Password",
+                        username: "new@example.com",
+                        password: generatedPassword,
+                        category: "New Category",
+                      });
+                      setShowPasswordGenerator(false);
+                      setGeneratedPassword("");
+                    }}
+                  >
+                    Save
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            <Button>Add Password</Button>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -210,7 +279,7 @@ export default function Component() {
           </Table>
         </div>
       </main>
-      {showPasswordGenerator && (
+      {/* {showPasswordGenerator && (
         <Dialog
           open={showPasswordGenerator}
           onOpenChange={setShowPasswordGenerator}
@@ -283,7 +352,7 @@ export default function Component() {
             </div>
           </DialogContent>
         </Dialog>
-      )}
+      )} */}
     </div>
   );
 }
