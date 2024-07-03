@@ -23,11 +23,11 @@ import { Label } from "@/components/ui/label";
 import {
   Copy,
   FilePenIcon,
+  Plus,
   SearchIcon,
   Sparkles,
   TrashIcon,
 } from "lucide-react";
-import CheckboxComponent from "@/components/ui/checkbox2";
 import {
   Accordion,
   AccordionContent,
@@ -45,8 +45,11 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import addPassword from "@/actions/prisma";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Component() {
+
   const [passwords, setPasswords] = useState([
     {
       id: 1,
@@ -79,12 +82,19 @@ export default function Component() {
   ]);
   const [searchTerm, setSearchTerm] = useState("");
   const [numbers, setNumbers] = useState(true);
+  const [title, setTitle] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [notes, setNotes] = useState("");
+  const [url, setUrl] = useState("");
+
   const [symbols, setSymbols] = useState(false);
   const [uppercase, setUppercase] = useState(true);
   const [category, setCategory] = useState("Login");
   const [length, setLength] = useState([8]);
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState("asc");
+  const [generatedPassword, setGeneratedPassword] = useState("");
   const filteredPasswords = useMemo(() => {
     return passwords
       .filter((password) =>
@@ -96,7 +106,6 @@ export default function Component() {
         return 0;
       });
   }, [passwords, searchTerm, sortBy, sortOrder]);
-  const [generatedPassword, setGeneratedPassword] = useState("");
 
   const generatePw = () => {
     const pw = generate({
@@ -107,16 +116,49 @@ export default function Component() {
     });
     setGeneratedPassword(pw);
   };
-
-  const addPassword = (password) => {
-    setPasswords([...passwords, password]);
+  const add = async () => {
+    try {
+      addPassword({
+        title: title,
+        username: username,
+        password: generatedPassword,
+        category: category,
+        email: email,
+        notes: notes,
+        url: url,
+      }).then((result) => {
+        if (result) {
+          setPasswords([
+            ...passwords,
+            {
+              id: passwords.length + 1,
+              name: title,
+              username: username,
+              password: generatedPassword,
+              category: category,
+            },
+          ]);
+          setTitle("");
+          setUsername("");
+          setGeneratedPassword("");
+          setCategory("Login");
+          setEmail("");
+          setNotes("");
+          setUrl("");
+          toast.success("Password saved successfully");
+        }
+      });
+    } catch (error) {
+      console.error("Failed to save password:", error);
+      toast.error("Failed to save password");
+    }
   };
-  const updatePassword = (id, updatedPassword) => {
-    setPasswords(passwords.map((p) => (p.id === id ? updatedPassword : p)));
-  };
-  const deletePassword = (id) => {
-    setPasswords(passwords.filter((p) => p.id !== id));
-  };
+  // const updatePassword = (id, updatedPassword) => {
+  //   setPasswords(passwords.map((p) => (p.id === id ? updatedPassword : p)));
+  // };
+  // const deletePassword = (id) => {
+  //   setPasswords(passwords.filter((p) => p.id !== id));
+  // };
   return (
     <div className="flex flex-col min-h-svh">
       <main className="flex-1 bg-background p-6">
@@ -134,7 +176,10 @@ export default function Component() {
           <div className="flex gap-2">
             <Dialog>
               <Button asChild>
-                <DialogTrigger>Open</DialogTrigger>
+                <DialogTrigger>
+                  <Plus size={18} className="mr-2" />
+                  Add Password
+                </DialogTrigger>
               </Button>
               <DialogContent className="bg-background px-4 py-6 rounded-md shadow-lg">
                 <ScrollArea className="max-h-[88svh] border-b rounded-md w-full">
@@ -150,23 +195,32 @@ export default function Component() {
                       <Input
                         type="text"
                         id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
                         placeholder="Add a title.."
                       />
                     </div>
 
                     <div className="grid gap-4">
                       <div>
+                        <Label htmlFor="username">Username</Label>
+                        <Input
+                          id="username"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder="Enter a username"
+                        />
+                      </div>
+
+                      <div>
                         <Label htmlFor="email">Email</Label>
                         <Input
                           id="email"
                           type="email"
                           placeholder="Enter a Email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
                         />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="username">Username</Label>
-                        <Input id="username" placeholder="Enter a username" />
                       </div>
 
                       <div className="relative">
@@ -267,6 +321,24 @@ export default function Component() {
                         </Accordion>
                       </div>
                       <div>
+                        <Label htmlFor="notes">Notes</Label>
+                        <Textarea
+                          id="notes"
+                          value={notes}
+                          onChange={(e) => setNotes(e.target.value)}
+                          placeholder="Add notes.."
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="url">URL</Label>
+                        <Input
+                          id="url"
+                          value={url}
+                          onChange={(e) => setUrl(e.target.value)}
+                          placeholder="Add URL.."
+                        />
+                      </div>
+                      <div>
                         <Label htmlFor="category">Category</Label>
                         <Select
                           onValueChange={setCategory}
@@ -302,14 +374,7 @@ export default function Component() {
                       </Button>
                       <Button
                         onClick={() => {
-                          addPassword({
-                            id: passwords.length + 1,
-                            name: "New Password",
-                            username: "new@example.com",
-                            password: generatedPassword,
-                            category: "New Category",
-                          });
-                          setGeneratedPassword("");
+                          add();
                         }}
                       >
                         Save
@@ -319,8 +384,6 @@ export default function Component() {
                 </ScrollArea>
               </DialogContent>
             </Dialog>
-
-            <Button>Add Password</Button>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -382,22 +445,22 @@ export default function Component() {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() =>
-                        updatePassword(password.id, {
-                          ...password,
-                          name: "Updated Name",
-                          username: "updated@example.com",
-                          password: "NewPassword123!",
-                          category: "Updated Category",
-                        })
-                      }
+                      // onClick={() =>
+                      //   updatePassword(password.id, {
+                      //     ...password,
+                      //     name: "Updated Name",
+                      //     username: "updated@example.com",
+                      //     password: "NewPassword123!",
+                      //     category: "Updated Category",
+                      //   })
+                      // }
                     >
                       <FilePenIcon size={18} />
                     </Button>
                     <Button
                       variant="destructive"
                       size="icon"
-                      onClick={() => deletePassword(password.id)}
+                      // onClick={() => deletePassword(password.id)}
                     >
                       <TrashIcon size={18} />
                     </Button>
