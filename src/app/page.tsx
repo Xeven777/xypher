@@ -7,12 +7,7 @@ import { Button } from "@/components/ui/button";
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center gap-2">
-      <LoginLink>
-        <Button>Login</Button>
-      </LoginLink>
-      <RegisterLink>
-        <Button>Register</Button>
-      </RegisterLink>
+      
     </main>
   );
 }
