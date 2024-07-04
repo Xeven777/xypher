@@ -117,7 +117,7 @@ export default function Component() {
   const [uppercase, setUppercase] = useState(true);
   const [category, setCategory] = useState("Login");
   const [length, setLength] = useState([8]);
-  const [sortBy, setSortBy] = useState<PasswordKey>("name");
+  const [sortBy, setSortBy] = useState<PasswordKey>("title");
   const [sortOrder, setSortOrder] = useState("asc");
   const [generatedPassword, setGeneratedPassword] = useState("");
 
@@ -156,7 +156,12 @@ export default function Component() {
     });
     setGeneratedPassword(pw);
   };
+
   const add = async () => {
+    if (!title || !username || !generatedPassword) {
+      toast.error("Title, Username and Password are required");
+      return;
+    }
     try {
       addPassword({
         title: title,
@@ -253,7 +258,7 @@ export default function Component() {
                           id="username"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
-                          placeholder="Enter a username"
+                          placeholder="Enter a username or phone number associated"
                         />
                       </div>
 
@@ -273,6 +278,7 @@ export default function Component() {
                         <Input
                           id="password"
                           value={generatedPassword}
+                          placeholder="Generated or add your Password"
                           onChange={(e) => {
                             setGeneratedPassword(e.target.value);
                           }}
@@ -283,6 +289,10 @@ export default function Component() {
                           title="Copy Password"
                           className="rounded-full active:rotate-6 hover:animate-pulse transition-all duration-300 absolute right-10 top-6"
                           onClick={() => {
+                            if (!generatedPassword) {
+                              toast.error("No password to copy");
+                              return;
+                            }
                             navigator.clipboard.writeText(generatedPassword);
                             toast.success("Password copied to clipboard");
                           }}

@@ -3,6 +3,7 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { encrypt } from "./cipher";
 
 export const addPassword = async (passwordData: {
   title: string;
@@ -13,7 +14,6 @@ export const addPassword = async (passwordData: {
   notes?: string;
   url?: string;
 }) => {
-  console.log("Addin ", passwordData.title, "to the database.");
   const prisma = new PrismaClient();
   const { getUser } = getKindeServerSession();
   const user = await getUser();
@@ -22,12 +22,13 @@ export const addPassword = async (passwordData: {
   }
 
   try {
+    const encryptedPassword = encrypt(passwordData.password);
     const result = await prisma.passwords.create({
       data: {
         userId: user.id,
         title: passwordData.title,
         userName: passwordData.username,
-        password: passwordData.password,
+        password: encryptedPassword,
         email: passwordData.email,
         category: passwordData.category,
         notes: passwordData.notes,
