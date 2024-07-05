@@ -200,7 +200,7 @@ export default function Component() {
   };
 
   return (
-    <div className="flex flex-col min-h-svh">
+    <div className="flex max-w-6xl mx-auto flex-col min-h-svh">
       <main className="flex-1 bg-background p-6">
         <div className="flex justify-between items-center mb-4">
           <div className="relative w-full max-w-md">

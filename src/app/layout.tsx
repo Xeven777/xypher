@@ -30,9 +30,9 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={fonty.className + " relative"}>
+      <body className={fonty.className + " relative overflow-x-hidden"}>
         <Navbar />
-        <div className="mx-auto max-w-6xl caret-primary">{children}</div>
+        <div className="mx-auto caret-primary">{children}</div>
         <Toaster richColors position="top-center" theme="dark" />
       </body>
     </html>
