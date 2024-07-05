@@ -2,6 +2,15 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -22,7 +31,9 @@ import {
 import { Label } from "@/components/ui/label";
 import {
   Copy,
+  Ellipsis,
   FilePenIcon,
+  Loader2,
   Plus,
   SearchIcon,
   Sparkles,
@@ -45,8 +56,9 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { addPassword, fetchPasswords } from "@/actions/prisma";
+import { addPassword, deletePassword, fetchPasswords } from "@/actions/prisma";
 import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
 type PasswordKey =
   | "id"
   | "userId"
@@ -72,37 +84,6 @@ type Password = {
 };
 
 export default function Component() {
-  // const [passwords, setPasswords] = useState([
-  //   {
-  //     id: 1,
-  //     name: "Gmail",
-  //     username: "john@example.com",
-  //     password: "Ht8$2Kd9",
-  //     category: "Email",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Netflix",
-  //     username: "john123",
-  //     password: "Qp7#Lm4F",
-  //     category: "Entertainment",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Bank of America",
-  //     username: "johnsmith",
-  //     password: "Xt9!Zw2P",
-  //     category: "Finance",
-  //   },
-  //   {
-  //     id: 4,
-  //     name: "Amazon",
-  //     username: "john.doe",
-  //     password: "Mj5@Fy6B",
-  //     category: "Shopping",
-  //   },
-  // ]);
-
   const [passwords, setPasswords] = useState<Password[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -119,6 +100,7 @@ export default function Component() {
   const [length, setLength] = useState([8]);
   const [sortBy, setSortBy] = useState<PasswordKey>("title");
   const [sortOrder, setSortOrder] = useState("asc");
+  const router = useRouter();
   const [generatedPassword, setGeneratedPassword] = useState("");
 
   useEffect(() => {
@@ -158,6 +140,7 @@ export default function Component() {
   };
 
   const add = async () => {
+    setLoading(true);
     if (!title || !username || !generatedPassword) {
       toast.error("Title, Username and Password are required");
       return;
@@ -196,19 +179,28 @@ export default function Component() {
           setNotes("");
           setUrl("");
           toast.success("Password saved successfully");
+          setLoading(false);
         }
       });
     } catch (error) {
       console.error("Failed to save password:", error);
+      setLoading(false);
       toast.error("Failed to save password");
     }
   };
   // const updatePassword = (id, updatedPassword) => {
   //   setPasswords(passwords.map((p) => (p.id === id ? updatedPassword : p)));
   // };
-  // const deletePassword = (id) => {
-  //   setPasswords(passwords.filter((p) => p.id !== id));
-  // };
+  const deletePw = async (id: string) => {
+    const res = await deletePassword(id);
+    if (res) {
+      toast.success("Password deleted successfully");
+      router.refresh();
+    } else {
+      toast.error("Failed to delete password");
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-svh">
       <main className="flex-1 bg-background p-6">
@@ -431,8 +423,14 @@ export default function Component() {
                         onClick={() => {
                           add();
                         }}
+                        disabled={loading}
                       >
-                        Save
+                        {loading ? "Saving..." : "Save"}
+                        {loading && (
+                          <span className="animate-spin">
+                            <Loader2 size={18} />
+                          </span>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -441,7 +439,7 @@ export default function Component() {
             </Dialog>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto border-2 rounded-md border-dashed">
           <Table>
             <TableHeader>
               <TableRow>
@@ -492,35 +490,41 @@ export default function Component() {
             </TableHeader>
             <TableBody>
               {filteredPasswords.map((password) => (
-                <TableRow key={password.id}>
+                <TableRow
+                  key={password.id}
+                  onClick={() => {
+                    router.push(`/pw/${password.id}`);
+                  }}
+                >
                   <TableCell className="font-medium">
                     {password.title}
                   </TableCell>
                   <TableCell>{password.userName}</TableCell>
                   <TableCell>{password.category}</TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      // onClick={() =>
-                      //   updatePassword(password.id, {
-                      //     ...password,
-                      //     name: "Updated Name",
-                      //     username: "updated@example.com",
-                      //     password: "NewPassword123!",
-                      //     category: "Updated Category",
-                      //   })
-                      // }
-                    >
-                      <FilePenIcon size={18} />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      // onClick={() => deletePassword(password.id)}
-                    >
-                      <TrashIcon size={18} />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <Button variant={"secondary"} size={"icon"}>
+                          <Ellipsis />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuLabel>Options</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>
+                          <FilePenIcon className="mr-2" size={18} />
+                          <span>Edit</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            deletePw(password.id);
+                          }}
+                        >
+                          <TrashIcon size={18} color="red" className="mr-2" />
+                          <span>Delete</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}

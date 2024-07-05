@@ -20,7 +20,7 @@ export default async function RootLayout({
     <html lang="en" className="dark">
       <body className={fonty.className + " relative"}>
         <Navbar />
-        <div className="mx-auto max-w-6xl">{children}</div>
+        <div className="mx-auto max-w-6xl caret-primary">{children}</div>
         <Toaster richColors position="top-center" theme="dark" />
       </body>
     </html>
