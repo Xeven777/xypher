@@ -195,7 +195,8 @@ export default function Component() {
     const res = await deletePassword(id);
     if (res) {
       toast.success("Password deleted successfully");
-      router.refresh();
+      // router.refresh();
+      setPasswords(passwords.filter((p) => p.id !== id));
     } else {
       toast.error("Failed to delete password");
     }
@@ -490,16 +491,23 @@ export default function Component() {
             </TableHeader>
             <TableBody>
               {filteredPasswords.map((password) => (
-                <TableRow
-                  key={password.id}
-                  onClick={() => {
-                    router.push(`/pw/${password.id}`);
-                  }}
-                >
-                  <TableCell className="font-medium">
+                <TableRow key={password.id}>
+                  <TableCell
+                    className="font-medium cursor-pointer"
+                    onClick={() => {
+                      router.push(`/pw/${password.id}`);
+                    }}
+                  >
                     {password.title}
                   </TableCell>
-                  <TableCell>{password.userName}</TableCell>
+                  <TableCell
+                    className="cursor-pointer"
+                    onClick={() => {
+                      router.push(`/pw/${password.id}`);
+                    }}
+                  >
+                    {password.userName}
+                  </TableCell>
                   <TableCell>{password.category}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

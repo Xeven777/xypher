@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import Link from "next/link";
 
 const Navbar = async () => {
   const { getUser } = getKindeServerSession();
@@ -17,16 +18,17 @@ const Navbar = async () => {
   return (
     <header className="sticky bg-background/20 border-b backdrop-blur-md p-2 w-full top-0 z-50">
       <nav className="w-full max-w-6xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-0 justify-center">
+        <Link href={"/pw"} className="flex items-center  justify-center">
           <Image
             src={"/logo-base-256x256.png"}
+            priority
             alt="X"
             className="active:hue-rotate-60 transition-all hover:animate-spin"
             width={50}
             height={50}
           />
           <h1 className="text-2xl md:text-3xl font-bold">Xypher</h1>
-        </div>
+        </Link>
         {user ? (
           <div className="flex items-center gap-2">
             <DropdownMenu>

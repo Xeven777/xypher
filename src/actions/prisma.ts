@@ -58,7 +58,6 @@ export const fetchPasswords = async () => {
         userId: user.id,
       },
     });
-    console.log("Passwords fetched:", passwords);
     return passwords;
   } catch (error) {
     console.error("Failed to fetch passwords:", error);
@@ -74,7 +73,6 @@ export const deletePassword = async (passwordId: string) => {
         id: passwordId,
       },
     });
-    console.log("Password deleted:", result);
     revalidatePath("/pw");
     return result;
   } catch (error) {
@@ -115,6 +113,22 @@ export const updatePassword = async (passwordData: {
     return result;
   } catch (error) {
     console.error("Failed to update password:", error);
+    return null;
+  }
+};
+
+export const passwordById = async (passwordId: string) => {
+  const prisma = new PrismaClient();
+  try {
+    const password = await prisma.passwords.findUnique({
+      where: {
+        id: passwordId,
+      },
+    });
+    console.log("Password fetched:", password);
+    return password;
+  } catch (error) {
+    console.error("Failed to fetch password:", error);
     return null;
   }
 };
