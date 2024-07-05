@@ -1,15 +1,27 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import withPWA from 'next-pwa';
+
+const pwaConfig = {
+    dest: 'public',
+    register: true,
+    caches: 'public, assets, fonts, images, static, pages',
+    skipWaiting: true,
+    disable: process.env.NODE_ENV === 'development',
+};
+
+const withPWAConfig = withPWA(pwaConfig);
+
+export default withPWAConfig({
     images: {
         remotePatterns: [
             {
-                hostname: "lh3.googleusercontent.com"
+                protocol: 'https',
+                hostname: "avatars.githubusercontent.com"
             },
             {
-                hostname:"avatars.githubusercontent.com"
+                protocol: 'https',
+                hostname: "lh3.googleusercontent.com"
             }
         ]
-    }
-};
-
-export default nextConfig;
+    },
+    reactStrictMode: true,
+});
