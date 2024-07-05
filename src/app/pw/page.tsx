@@ -188,14 +188,11 @@ export default function Component() {
       toast.error("Failed to save password");
     }
   };
-  // const updatePassword = (id, updatedPassword) => {
-  //   setPasswords(passwords.map((p) => (p.id === id ? updatedPassword : p)));
-  // };
+
   const deletePw = async (id: string) => {
     const res = await deletePassword(id);
     if (res) {
       toast.success("Password deleted successfully");
-      // router.refresh();
       setPasswords(passwords.filter((p) => p.id !== id));
     } else {
       toast.error("Failed to delete password");

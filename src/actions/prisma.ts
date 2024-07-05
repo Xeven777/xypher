@@ -125,7 +125,6 @@ export const passwordById = async (passwordId: string) => {
         id: passwordId,
       },
     });
-    console.log("Password fetched:", password);
     return password;
   } catch (error) {
     console.error("Failed to fetch password:", error);

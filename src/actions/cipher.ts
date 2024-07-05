@@ -17,20 +17,26 @@ export function encrypt(text: string): string {
 }
 
 export function decrypt(encryptedText: string): string {
-  const [ivHex, encrypted] = encryptedText.split(":");
-  const iv = Buffer.from(ivHex, "hex");
-  const decipher = crypto.createDecipheriv(
-    "aes-256-cbc",
-    Buffer.from(SECRET_KEY, "hex"),
-    iv
-  );
-  let decrypted = decipher.update(encrypted, "hex", "utf8");
-  decrypted += decipher.final("utf8");
-  return decrypted;
+  try {
+    const [ivHex, encrypted] = encryptedText.split(":");
+    const iv = Buffer.from(ivHex, "hex");
+    const decipher = crypto.createDecipheriv(
+      "aes-256-cbc",
+      Buffer.from(SECRET_KEY, "hex"),
+      iv
+    );
+    let decrypted = decipher.update(encrypted, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+    return decrypted;
+  } catch (error) {
+    console.error("Decryption failed:", error);
+    throw error; // Rethrow the error after logging
+  }
 }
-
 // console.log(encrypt("Hello, World!"));
-// console.log(decrypt(encrypt("Hello, World!")));
+// console.log("hiiiiii ",
+//   decrypt("ed88ef90c28e8593e747a4281294d23b:27e1c88218d99d8432a2de2a4d6f3f7d")
+// );
 
 // Function to generate a 256-bit key
 // const generate256BitKey = (): string => {

@@ -5,13 +5,13 @@ import { toast } from "sonner";
 const CopyComp = ({ text }: { text: string }) => {
   return (
     <p
-      className="p-4 border rounded flex cursor-copy hover:shadow-md hover:shadow-primary/50 transition-all duration-300"
+      className="p-4 border rounded flex cursor-copy hover:shadow-md hover:shadow-primary/40 transition-all duration-300"
       onClick={() => {
         navigator.clipboard.writeText(text);
         toast.success("Password copied to clipboard");
       }}
     >
-      <span className="text-muted-foreground">Password: </span> {text}{" "}
+      <span className="text-muted-foreground pr-2">Password: </span> {text}{" "}
       <Copy size={18} className="ml-20" />
     </p>
   );
