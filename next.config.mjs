@@ -3,7 +3,6 @@ import withPWA from 'next-pwa';
 const pwaConfig = {
     dest: 'public',
     register: true,
-    caches: 'public, assets, fonts, images, static, pages',
     skipWaiting: true,
     disable: process.env.NODE_ENV === 'development',
 };
