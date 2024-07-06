@@ -22,7 +22,7 @@ export default async function Home() {
           Anish💚
         </a>
       </footer>
-      <div className="absolute dark:bg-green-700/20 -right-20 bottom-0 blur-3xl w-96 h-60 rounded-full z-50" />
+      <div className="fixed dark:bg-green-700/20 -right-20 bottom-0 blur-3xl w-96 h-60 rounded-full z-50" />
     </div>
   );
 }
