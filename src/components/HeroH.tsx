@@ -48,19 +48,16 @@ export function HeroHighlightDemo() {
           duration: 0.5,
           ease: [0.4, 0.0, 0.2, 1],
         }}
-        className="text-2xl px-4 md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto "
+        className="text-2xl px-4 md:text-4xl lg:text-5xl font-bold text-neutral-700 dark:text-white max-w-4xl leading-relaxed lg:leading-snug text-center mx-auto text-pretty"
       >
         Secure your passwords with the <br />
-        <Highlight>
-          Best 256-bit encryption
-        </Highlight>{" "}
-        <br />
+        <Highlight>Best 256-bit encryption</Highlight> <br />
         in the cloud
       </motion.h1>
       <Button
         asChild
         size={"lg"}
-        className="mx-auto text-xl md:text-3xl p-5  md:px-6 md:py-8 -rotate-2 hover:rotate-0 mt-5"
+        className="mx-auto text-xl md:text-3xl p-5  md:px-6 md:py-8 z-[110] -rotate-2 hover:rotate-0 mt-5"
       >
         <Link href="/pw">
           Get Started{" "}

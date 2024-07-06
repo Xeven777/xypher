@@ -17,7 +17,7 @@ const Navbar = async () => {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
   return (
-    <header className="sticky bg-background/20 border-b backdrop-blur-md p-2 w-full top-0 z-50">
+    <header className="sticky bg-background/20 border-b backdrop-blur-md p-2 w-full top-0 z-[500]">
       <nav className="w-full max-w-6xl mx-auto flex items-center justify-between">
         <Link href={"/pw"} className="flex items-center  justify-center">
           <Image
