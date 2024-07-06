@@ -60,7 +60,7 @@ export function HeroHighlightDemo() {
       <Button
         asChild
         size={"lg"}
-        className="mx-auto text-xl md:text-3xl p-6 py-8 -rotate-2 hover:rotate-0 mt-5"
+        className="mx-auto text-xl md:text-3xl p-5  md:px-6 md:py-8 -rotate-2 hover:rotate-0 mt-5"
       >
         <Link href="/pw">
           Get Started{" "}
