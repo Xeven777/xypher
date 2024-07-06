@@ -35,7 +35,6 @@ import { Textarea } from "@/components/ui/textarea";
 import crypto from "crypto";
 import { Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import { decrypt } from "@/actions/cipher";
 
 const EditDialog = ({ passwordDetails }: any) => {
   function decrypt(encryptedText: string): string {
@@ -86,6 +85,10 @@ const EditDialog = ({ passwordDetails }: any) => {
     setGeneratedPassword(pw);
   };
   const handleUpdate = async () => {
+    if (!title || !generatedPassword || (!username && !email)) {
+      toast.error("Title, password and username or email are required");
+      return;
+    }
     setLoading(true);
     const passwordData = {
       id: passwordDetails.id,

@@ -11,6 +11,7 @@ import {
 
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import Link from "next/link";
+import { ModeToggle } from "./themebutton";
 
 const Navbar = async () => {
   const { getUser } = getKindeServerSession();
@@ -29,44 +30,45 @@ const Navbar = async () => {
           />
           <h1 className="text-2xl md:text-3xl font-bold">Xypher</h1>
         </Link>
-        {user ? (
-          <div className="flex items-center gap-2">
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Image
-                  src={user.picture || "/logo-base-256x256.png"}
-                  alt={user.given_name || "Friend"}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>
-                  Hey {user?.given_name || "Friend"}!
-                </DropdownMenuLabel>
-                <DropdownMenuItem>
-                  <p className="text-sm text-muted-foreground">
-                    {user?.email || "Opps! No email found."}
-                  </p>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <LogoutLink>
-                    <Button variant={"outline"} className="w-full">
-                      Logout
-                    </Button>
-                  </LogoutLink>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        ) : (
-          <div>
+        <div className="flex gap-2 sm:gap-4">
+          <ModeToggle />
+          {user ? (
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <Image
+                    src={user.picture || "/logo-base-256x256.png"}
+                    alt={user.given_name || "Friend"}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>
+                    Hey {user?.given_name || "Friend"}!
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem>
+                    <p className="text-sm text-muted-foreground">
+                      {user?.email || "Opps! No email found."}
+                    </p>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <LogoutLink>
+                      <Button variant={"outline"} className="w-full">
+                        Logout
+                      </Button>
+                    </LogoutLink>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
             <LoginLink>
               <Button>Login</Button>
             </LoginLink>
-          </div>
-        )}
+          )}
+        </div>
       </nav>
     </header>
   );

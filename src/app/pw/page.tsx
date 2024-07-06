@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/accordion";
 import { generate } from "generate-password-browser";
 import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -93,7 +94,7 @@ export default function Component() {
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [url, setUrl] = useState("");
-
+  const [loadPw, setLoadPw] = useState(false);
   const [symbols, setSymbols] = useState(false);
   const [uppercase, setUppercase] = useState(true);
   const [category, setCategory] = useState("Login");
@@ -105,12 +106,14 @@ export default function Component() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoadPw(true);
       const fetchedPasswords = await fetchPasswords();
       if (!fetchedPasswords) {
+        setLoadPw(false);
         return;
       }
       setPasswords(fetchedPasswords);
-      setLoading(false);
+      setLoadPw(false);
     };
     fetchData();
   }, []);
@@ -140,11 +143,11 @@ export default function Component() {
   };
 
   const add = async () => {
-    setLoading(true);
-    if (!title || !username || !generatedPassword) {
-      toast.error("Title, Username and Password are required");
+    if (!title || !generatedPassword || (!username && !email)) {
+      toast.error("Title, password and username or email are required");
       return;
     }
+    setLoading(true);
     try {
       addPassword({
         title: title,
@@ -437,105 +440,137 @@ export default function Component() {
             </Dialog>
           </div>
         </div>
-        <div className="overflow-x-auto border-2 rounded-md border-dashed">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setSortBy("title");
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  }}
-                >
-                  Name{" "}
-                  {sortBy === "title" && (
-                    <span className="ml-1">
-                      {sortOrder === "asc" ? "\u2191" : "\u2193"}
-                    </span>
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setSortBy("userName");
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  }}
-                >
-                  Username{" "}
-                  {sortBy === "userName" && (
-                    <span className="ml-1">
-                      {sortOrder === "asc" ? "\u2191" : "\u2193"}
-                    </span>
-                  )}
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setSortBy("category");
-                    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-                  }}
-                >
-                  Category{" "}
-                  {sortBy === "category" && (
-                    <span className="ml-1">
-                      {sortOrder === "asc" ? "\u2191" : "\u2193"}
-                    </span>
-                  )}
-                </TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPasswords.map((password) => (
-                <TableRow key={password.id}>
-                  <TableCell
-                    className="font-medium cursor-pointer"
-                    onClick={() => {
-                      router.push(`/pw/${password.id}`);
-                    }}
-                  >
-                    {password.title}
-                  </TableCell>
-                  <TableCell
-                    className="cursor-pointer"
-                    onClick={() => {
-                      router.push(`/pw/${password.id}`);
-                    }}
-                  >
-                    {password.userName}
-                  </TableCell>
-                  <TableCell>{password.category}</TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <Button variant={"secondary"} size={"icon"}>
-                          <Ellipsis />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuLabel>Options</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <FilePenIcon className="mr-2" size={18} />
-                          <span>Edit</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
+        {loadPw ? (
+          <div className="flex justify-center items-center h-96">
+            <Loader2 size={40} className="animate-spin" />
+          </div>
+        ) : (
+          <div className="overflow-x-auto border-2 rounded-md border-dashed">
+            {filteredPasswords.length > 0 ? (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSortBy("title");
+                          setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                        }}
+                      >
+                        Name{" "}
+                        {sortBy === "title" && (
+                          <span className="ml-1">
+                            {sortOrder === "asc" ? "\u2191" : "\u2193"}
+                          </span>
+                        )}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer md:table-cell hidden"
+                        onClick={() => {
+                          setSortBy("userName");
+                          setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                        }}
+                      >
+                        Username{" "}
+                        {sortBy === "userName" && (
+                          <span className="ml-1">
+                            {sortOrder === "asc" ? "\u2191" : "\u2193"}
+                          </span>
+                        )}
+                      </TableHead>
+                      <TableHead
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSortBy("category");
+                          setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                        }}
+                      >
+                        Category{" "}
+                        {sortBy === "category" && (
+                          <span className="ml-1">
+                            {sortOrder === "asc" ? "\u2191" : "\u2193"}
+                          </span>
+                        )}
+                      </TableHead>
+                      <TableHead className=" md:table-cell hidden">
+                        Email
+                      </TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPasswords.map((password) => (
+                      <TableRow key={password.id}>
+                        <TableCell
+                          className="font-medium cursor-pointer"
                           onClick={() => {
-                            deletePw(password.id);
+                            router.push(`/pw/${password.id}`);
                           }}
                         >
-                          <TrashIcon size={18} color="red" className="mr-2" />
-                          <span>Delete</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                          {password.title}
+                        </TableCell>
+                        <TableCell
+                          className="cursor-pointer  md:block hidden"
+                          onClick={() => {
+                            router.push(`/pw/${password.id}`);
+                          }}
+                        >
+                          {password.userName}
+                        </TableCell>
+                        <TableCell>
+                          {/* @ts-expect-error */}
+                          <Badge variant={password.category || "primary"}>
+                            {password.category}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className=" md:block hidden">
+                          {password.email}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger>
+                              <Button variant={"secondary"} size={"icon"}>
+                                <Ellipsis />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                              <DropdownMenuLabel>Options</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem>
+                                <FilePenIcon className="mr-2" size={18} />
+                                <span>Edit</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  deletePw(password.id);
+                                }}
+                              >
+                                <TrashIcon
+                                  size={18}
+                                  color="red"
+                                  className="mr-2"
+                                />
+                                <span>Delete</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </>
+            ) : (
+              <div>
+                <p className="text-center w-full text-base p-2 md:p-6 md:text-xl text-muted-foreground">
+                  No passwords found. Start adding now!
+                </p>
+                
+              </div>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );

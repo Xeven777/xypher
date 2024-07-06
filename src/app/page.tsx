@@ -10,9 +10,19 @@ export default async function Home() {
   return (
     <div className="overflow-x-hidden max-w-screen">
       <div className="absolute bg-green-700/20 -left-20 top-0 blur-3xl w-96 h-60 rounded-full z-50" />
-
       <HeroHighlightDemo />
-      {/* <div className="absolute bg-green-700/20 -right-20 bottom-0 blur-3xl w-96 h-60 rounded-full z-50" /> */}
+      <footer className="fixed bottom-2 right-10 border py-2 px-3 bg-green-100/60 dark:bg-green-950/65 border-green-700 rounded-md text-green-900 dark:text-green-200 z-[51]">
+        made by{" "}
+        <a
+          href="http://bento.me/anish7"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-green-500 hover:underline"
+        >
+          Anish💚
+        </a>
+      </footer>
+      <div className="absolute dark:bg-green-700/20 -right-20 bottom-0 blur-3xl w-96 h-60 rounded-full z-50" />
     </div>
   );
 }
