@@ -86,7 +86,7 @@ type Password = {
 
 export default function Component() {
   const [passwords, setPasswords] = useState<Password[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [numbers, setNumbers] = useState(true);
   const [title, setTitle] = useState("");
@@ -203,7 +203,7 @@ export default function Component() {
   };
 
   return (
-    <div className="flex max-w-6xl mx-auto flex-col min-h-svh">
+    <div className="flex max-w-6xl mx-auto flex-col">
       <main className="flex-1 bg-background p-6">
         <div className="flex justify-between items-center mb-4">
           <div className="relative w-full max-w-md">

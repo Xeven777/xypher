@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   description:
     "Best & Free password manager with 256-bit AES encryption in cloud",
   manifest: "/manifest.json",
+  metadataBase: new URL("https://xypher7.vercel.app"),
   icons: {
     icon: "/favicon-32x32.png",
     apple: "/apple-touch-icon.png",
