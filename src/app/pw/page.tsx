@@ -537,7 +537,11 @@ export default function Component() {
                             <DropdownMenuContent>
                               <DropdownMenuLabel>Options</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  router.push("/pw/" + password.id);
+                                }}
+                              >
                                 <FilePenIcon className="mr-2" size={18} />
                                 <span>Edit</span>
                               </DropdownMenuItem>
@@ -566,7 +570,6 @@ export default function Component() {
                 <p className="text-center w-full text-base p-2 md:p-6 md:text-xl text-muted-foreground">
                   No passwords found. Start adding now!
                 </p>
-                
               </div>
             )}
           </div>
