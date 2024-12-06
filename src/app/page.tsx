@@ -8,8 +8,7 @@ export default async function Home() {
     redirect("/pw");
   }
   return (
-    <div className="overflow-x-hidden max-w-screen">
-      <div className="absolute bg-green-700/20 -left-20 top-0 blur-3xl w-96 h-60 rounded-full z-50" />
+    <div className="overflow-x-hidden max-w-screen flex flex-col items-center justify-center min-h-screen">
       <HeroHighlightDemo />
       <footer className="fixed bottom-2 right-10 border py-2 px-3 bg-green-100/60 dark:bg-green-950/65 border-green-700 rounded-md text-green-900 dark:text-green-200 z-[51]">
         made by{" "}
@@ -22,7 +21,8 @@ export default async function Home() {
           Anish💚
         </a>
       </footer>
-      <div className="fixed bg-green-200/30 dark:bg-green-700/20 -right-20 bottom-0 blur-3xl w-96 h-60 rounded-full z-50" />
+      <div className="absolute bg-green-700/20 -left-20 top-0 blur-3xl w-96 h-60 rounded-full z-0" />
+      <div className="fixed bg-green-200/30 dark:bg-green-700/20 -right-20 bottom-0 blur-3xl w-96 h-60 rounded-full" />
     </div>
   );
 }

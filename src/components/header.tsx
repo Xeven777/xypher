@@ -13,11 +13,11 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import Link from "next/link";
 import { ModeToggle } from "./themebutton";
 
-const Navbar = async () => {
+export default async function Navbar() {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
   return (
-    <header className="sticky bg-background/20 border-b backdrop-blur-md p-2 w-full top-0 z-[500]">
+    <header className="fixed bg-background/20 border-b backdrop-blur-md p-2 w-full top-0 z-10">
       <nav className="w-full max-w-6xl mx-auto flex items-center justify-between">
         <Link href={"/pw"} className="flex items-center  justify-center">
           <Image
@@ -72,6 +72,4 @@ const Navbar = async () => {
       </nav>
     </header>
   );
-};
-
-export default Navbar;
+}
