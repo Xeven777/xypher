@@ -5,5 +5,5 @@ export default function middleware(req: Request) {
 }
 
 export const config = {
-  matcher: ["/pw"],
+  matcher: ["/pw", "/pw/(.*)"],
 };

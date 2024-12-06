@@ -11,7 +11,7 @@ import {
 
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import Link from "next/link";
-import { ModeToggle } from "./themebutton";
+import { ThemeToggle } from "./themebutton";
 
 export default async function Navbar() {
   const { getUser } = getKindeServerSession();
@@ -31,7 +31,7 @@ export default async function Navbar() {
           <h1 className="text-2xl md:text-3xl font-bold">Xypher</h1>
         </Link>
         <div className="flex gap-2 sm:gap-4">
-          <ModeToggle />
+          <ThemeToggle />
           {user ? (
             <div className="flex items-center gap-2">
               <DropdownMenu>

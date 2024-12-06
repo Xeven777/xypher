@@ -5,6 +5,7 @@ import Navbar from "@/components/header";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Suspense } from "react";
+import { AuthProvider } from "@/lib/AuthProvider";
 
 const fonty = Sora({ subsets: ["latin"] });
 
@@ -33,17 +34,18 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    
-    <html lang="en">
-      <body className={fonty.className + " relative overflow-x-hidden"}>
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          <Suspense>
-            <Navbar />
-          </Suspense>
-          <div className="mx-auto caret-primary">{children}</div>
-          <Toaster richColors position="top-center" theme="dark" />
-        </ThemeProvider>
-      </body>
-    </html>
+    <AuthProvider>
+      <html lang="en">
+        <body className={fonty.className + " relative overflow-x-hidden"}>
+          <ThemeProvider attribute="class" defaultTheme="dark">
+            <Suspense>
+              <Navbar />
+            </Suspense>
+            <div className="mx-auto caret-primary">{children}</div>
+            <Toaster richColors position="top-center" theme="dark" />
+          </ThemeProvider>
+        </body>
+      </html>
+    </AuthProvider>
   );
 }
