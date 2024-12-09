@@ -39,6 +39,7 @@ export default async function RootLayout({
         <body className={fonty.className + " relative overflow-x-hidden"}>
           <ThemeProvider attribute="class" defaultTheme="dark">
             <Suspense>
+              {/* @ts-ignore */}
               <Navbar />
             </Suspense>
             <div className="mx-auto caret-primary">{children}</div>

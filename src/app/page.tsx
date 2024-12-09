@@ -10,7 +10,7 @@ export default async function Home() {
   return (
     <div className="overflow-x-hidden max-w-screen flex flex-col items-center justify-center min-h-screen">
       <HeroHighlightDemo />
-      <footer className="fixed bottom-2 right-10 border py-2 px-3 bg-green-100/60 dark:bg-green-950/65 border-green-700 rounded-md text-green-900 dark:text-green-200 z-[51]">
+      <footer className="fixed bottom-2 right-10 border py-2 px-3 bg-green-100/60 dark:bg-green-950/65 border-green-700 rounded-md text-green-900 dark:text-green-200 z-[51] md:text-base text-sm">
         made by{" "}
         <a
           href="http://bento.me/anish7"
