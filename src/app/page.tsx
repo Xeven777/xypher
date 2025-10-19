@@ -2,6 +2,8 @@ import { HeroHighlightDemo } from "@/components/HeroH";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const { isAuthenticated } = getKindeServerSession();
   if (await isAuthenticated()) {

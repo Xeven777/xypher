@@ -33,15 +33,3 @@ export function decrypt(encryptedText: string): string {
     throw error; // Rethrow the error after logging
   }
 }
-// console.log(encrypt("Hello, World!"));
-// console.log("hiiiiii ",
-//   decrypt("ed88ef90c28e8593e747a4281294d23b:27e1c88218d99d8432a2de2a4d6f3f7d")
-// );
-
-// Function to generate a 256-bit key
-// const generate256BitKey = (): string => {
-//   const key = crypto.randomBytes(32).toString("hex");
-//   return key;
-// };
-
-// console.log(generate256BitKey());

@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Suspense } from "react";
 import { AuthProvider } from "@/lib/AuthProvider";
 
+export const dynamic = "force-dynamic";
+
 const fonty = Sora({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -39,7 +41,6 @@ export default async function RootLayout({
         <body className={fonty.className + " relative overflow-x-hidden"}>
           <ThemeProvider attribute="class" defaultTheme="dark">
             <Suspense>
-              {/* @ts-ignore */}
               <Navbar />
             </Suspense>
             <div className="mx-auto caret-primary">{children}</div>

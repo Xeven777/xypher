@@ -19,7 +19,7 @@ export default async function Navbar() {
   return (
     <header className="fixed bg-background/20 border-b backdrop-blur-md p-2 w-full top-0 z-10">
       <nav className="w-full max-w-6xl mx-auto flex items-center justify-between">
-        <Link href={"/pw"} className="flex items-center  justify-center">
+        <Link href={"/pw"} className="flex items-center justify-center">
           <Image
             src={"/logo-base-256x256.png"}
             priority

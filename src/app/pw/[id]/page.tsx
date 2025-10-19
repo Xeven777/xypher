@@ -4,22 +4,21 @@ import CopyComp from "@/components/copyComp";
 import EditDialog from "@/components/editDialog";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 
+export const dynamic = "force-dynamic";
+
 const page = async ({
   params,
 }: {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }) => {
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
-  const res = await passwordById(params.id);
+  const res = await passwordById((await params)?.id);
 
-  if (!res)
-    return <div className="p-6 text-primary mt-12">Error. Not Found.</div>;
-
-  if (res.userId !== user.id)
+  if (!res || !user || res.userId !== user.id)
     return <div className="p-6 text-primary mt-12">Error. Not Found.</div>;
 
   const decryptedPassword = decrypt(res.password);

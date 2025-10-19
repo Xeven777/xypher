@@ -1,26 +1,30 @@
-import withPWA from 'next-pwa';
-
-const pwaConfig = {
-    dest: 'public',
-    register: true,
-    skipWaiting: true,
-    disable: process.env.NODE_ENV === 'development',
-};
-
-const withPWAConfig = withPWA(pwaConfig);
-
-export default withPWAConfig({
+/** @type {import('next').NextConfig} */
+const nextConfig = {
     images: {
         remotePatterns: [
             {
-                protocol: 'https',
-                hostname: "avatars.githubusercontent.com"
+                protocol: "https",
+                hostname: "avatars.githubusercontent.com",
             },
             {
-                protocol: 'https',
-                hostname: "lh3.googleusercontent.com"
-            }
-        ]
+                protocol: "https",
+                hostname: "lh3.googleusercontent.com",
+            },
+        ],
     },
-    reactStrictMode: true,
-});
+    experimental: {
+        reactCompiler: true,
+    },
+    env: {
+        KINDE_SITE_URL:
+            process.env.KINDE_SITE_URL ?? `https://${process.env.VERCEL_URL}`,
+        KINDE_POST_LOGOUT_REDIRECT_URL:
+            process.env.KINDE_POST_LOGOUT_REDIRECT_URL ??
+            `https://${process.env.VERCEL_URL}`,
+        KINDE_POST_LOGIN_REDIRECT_URL:
+            process.env.KINDE_POST_LOGIN_REDIRECT_URL ??
+            `https://${process.env.VERCEL_URL}/pw`,
+    },
+};
+
+export default nextConfig;
