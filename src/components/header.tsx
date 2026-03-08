@@ -12,6 +12,7 @@ import {
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import Link from "next/link";
 import { ThemeToggle } from "./themebutton";
+import { ShieldCheck } from "lucide-react";
 
 export default async function Navbar() {
   const { getUser } = getKindeServerSession();
@@ -52,6 +53,14 @@ export default async function Navbar() {
                     <p className="text-sm text-muted-foreground">
                       {user?.email || "Opps! No email found."}
                     </p>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/pw/audit" className="w-full">
+                      <Button variant="ghost" className="w-full justify-start">
+                        <ShieldCheck className="mr-2" size={18} />
+                        Security Audit
+                      </Button>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <LogoutLink>

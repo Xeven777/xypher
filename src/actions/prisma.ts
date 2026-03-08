@@ -3,7 +3,7 @@
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { encrypt } from "./cipher";
+import { encrypt, decrypt } from "./cipher";
 
 export const addPassword = async (passwordData: {
   title: string;
@@ -13,6 +13,8 @@ export const addPassword = async (passwordData: {
   email?: string;
   notes?: string;
   url?: string;
+  isFavorite?: boolean;
+  tags?: string[];
 }) => {
   const prisma = new PrismaClient();
   const { getUser } = getKindeServerSession();
@@ -33,6 +35,8 @@ export const addPassword = async (passwordData: {
         category: passwordData.category,
         notes: passwordData.notes,
         url: passwordData.url,
+        isFavorite: passwordData.isFavorite || false,
+        tags: passwordData.tags || [],
       },
     });
     console.log("Password saved:", result);
@@ -42,6 +46,22 @@ export const addPassword = async (passwordData: {
     console.error("Failed to save password:", error);
     return null;
   }
+};
+
+export const fetchDecryptedPasswords = async () => {
+  const { getUser } = getKindeServerSession();
+  const user = await getUser();
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const passwords = await fetchPasswords();
+  if (!passwords) return null;
+
+  return passwords.map((p) => ({
+    ...p,
+    password: decrypt(p.password),
+  }));
 };
 
 export const fetchPasswords = async () => {
@@ -90,6 +110,8 @@ export const updatePassword = async (passwordData: {
   email?: string;
   notes?: string;
   url?: string;
+  isFavorite?: boolean;
+  tags?: string[];
 }) => {
   const prisma = new PrismaClient();
   const encryptedPassword = encrypt(passwordData.password);
@@ -106,6 +128,8 @@ export const updatePassword = async (passwordData: {
         category: passwordData.category,
         notes: passwordData.notes,
         url: passwordData.url,
+        isFavorite: passwordData.isFavorite,
+        tags: passwordData.tags,
       },
     });
     console.log("Password updated:", result);
@@ -113,6 +137,25 @@ export const updatePassword = async (passwordData: {
     return result;
   } catch (error) {
     console.error("Failed to update password:", error);
+    return null;
+  }
+};
+
+export const toggleFavorite = async (passwordId: string, isFavorite: boolean) => {
+  const prisma = new PrismaClient();
+  try {
+    const result = await prisma.passwords.update({
+      where: {
+        id: passwordId,
+      },
+      data: {
+        isFavorite: !isFavorite,
+      },
+    });
+    revalidatePath("/pw");
+    return result;
+  } catch (error) {
+    console.error("Failed to toggle favorite:", error);
     return null;
   }
 };

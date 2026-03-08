@@ -13,11 +13,13 @@ model Passwords {
   createdAt DateTime @default(now())
   password  String
   title     String
-  category  String
-  userName  String?
-  url       String?
-  notes     String?
-  email     String?
+  category   String
+  userName   String?
+  url        String?
+  notes      String?
+  email      String?
+  isFavorite Boolean  @default(false)
+  tags       String[] @default([])
 
   @@map("passwords")
 }

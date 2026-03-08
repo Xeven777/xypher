@@ -37,6 +37,7 @@ import {
   Plus,
   SearchIcon,
   Sparkles,
+  Star,
   TrashIcon,
 } from "lucide-react";
 import {
@@ -57,9 +58,16 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { addPassword, deletePassword, fetchPasswords } from "@/actions/prisma";
+import {
+  addPassword,
+  deletePassword,
+  fetchPasswords,
+  toggleFavorite,
+} from "@/actions/prisma";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
+import { PasswordStrengthMeter } from "@/components/PasswordStrengthMeter";
+import ImportExportButtons from "@/components/ImportExportButtons";
 type PasswordKey =
   | "id"
   | "userId"
@@ -70,7 +78,9 @@ type PasswordKey =
   | "userName"
   | "url"
   | "notes"
-  | "email";
+  | "email"
+  | "isFavorite"
+  | "tags";
 type Password = {
   id: string;
   userId: string;
@@ -82,6 +92,8 @@ type Password = {
   url: string | null;
   notes: string | null;
   email: string | null;
+  isFavorite: boolean;
+  tags: string[];
 };
 
 export default function Component() {
@@ -103,6 +115,8 @@ export default function Component() {
   const [sortOrder, setSortOrder] = useState("asc");
   const router = useRouter();
   const [generatedPassword, setGeneratedPassword] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,10 +134,17 @@ export default function Component() {
 
   const filteredPasswords = useMemo(() => {
     return passwords
-      .filter((password) =>
-        password?.title.toLowerCase().includes(searchTerm.toLowerCase())
+      .filter(
+        (password) =>
+          password?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          password?.tags?.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase())
+          )
       )
       .sort((a, b) => {
+        if (a.isFavorite !== b.isFavorite) {
+          return a.isFavorite ? -1 : 1;
+        }
         // @ts-expect-error
         if (a![sortBy] < b![sortBy]) return sortOrder === "asc" ? -1 : 1;
         // @ts-expect-error
@@ -157,6 +178,7 @@ export default function Component() {
         email: email,
         notes: notes,
         url: url,
+        tags: tags,
       }).then((result) => {
         if (result) {
           setPasswords([
@@ -172,6 +194,8 @@ export default function Component() {
               id: result.id,
               userId: result.userId,
               createdAt: result.createdAt,
+              isFavorite: result.isFavorite,
+              tags: result.tags,
             },
           ]);
           setTitle("");
@@ -181,6 +205,8 @@ export default function Component() {
           setEmail("");
           setNotes("");
           setUrl("");
+          setTags([]);
+          setTagsInput("");
           toast.success("Password saved successfully");
           setLoading(false);
         }
@@ -202,6 +228,20 @@ export default function Component() {
     }
   };
 
+  const onToggleFavorite = async (id: string, currentFavorite: boolean) => {
+    const res = await toggleFavorite(id, currentFavorite);
+    if (res) {
+      setPasswords(
+        passwords.map((p) => (p.id === id ? { ...p, isFavorite: !currentFavorite } : p))
+      );
+      toast.success(
+        currentFavorite ? "Removed from favorites" : "Added to favorites"
+      );
+    } else {
+      toast.error("Failed to update favorite");
+    }
+  };
+
   return (
     <div className="flex max-w-6xl mx-auto flex-col mt-14">
       <main className="flex-1 bg-background p-6">
@@ -216,7 +256,8 @@ export default function Component() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <ImportExportButtons passwords={passwords} />
             <Dialog>
               <Button asChild>
                 <DialogTrigger>
@@ -301,6 +342,7 @@ export default function Component() {
                           <Sparkles size={20} />
                         </Button>
                       </div>
+                      <PasswordStrengthMeter password={generatedPassword} />
                       <div>
                         <Label htmlFor="length">
                           Length{" "}
@@ -387,6 +429,30 @@ export default function Component() {
                         />
                       </div>
                       <div>
+                        <Label htmlFor="tags">Tags (comma separated)</Label>
+                        <Input
+                          id="tags"
+                          value={tagsInput}
+                          onChange={(e) => {
+                            setTagsInput(e.target.value);
+                            setTags(
+                              e.target.value
+                                .split(",")
+                                .map((tag) => tag.trim())
+                                .filter((tag) => tag !== "")
+                            );
+                          }}
+                          placeholder="e.g. Work, Personal, Social"
+                        />
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {tags.map((tag) => (
+                            <Badge key={tag} variant="secondary">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
                         <Label htmlFor="category">Category</Label>
                         <Select
                           onValueChange={setCategory}
@@ -451,6 +517,7 @@ export default function Component() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-[50px]"></TableHead>
                       <TableHead
                         className="cursor-pointer"
                         onClick={() => {
@@ -502,6 +569,24 @@ export default function Component() {
                   <TableBody>
                     {filteredPasswords.map((password) => (
                       <TableRow key={password.id}>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              onToggleFavorite(password.id, password.isFavorite)
+                            }
+                          >
+                            <Star
+                              size={18}
+                              className={
+                                password.isFavorite
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-muted-foreground"
+                              }
+                            />
+                          </Button>
+                        </TableCell>
                         <TableCell
                           className="font-medium cursor-pointer"
                           onClick={() => {

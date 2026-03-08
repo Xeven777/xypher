@@ -32,40 +32,25 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { updatePassword } from "@/actions/prisma";
 import { Textarea } from "@/components/ui/textarea";
-import crypto from "crypto";
 import { Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
 
-const EditDialog = ({ passwordDetails }: any) => {
-  function decrypt(encryptedText: string): string {
-    try {
-      const [ivHex, encrypted] = encryptedText.split(":");
-      const iv = Buffer.from(ivHex, "hex");
-      const decipher = crypto.createDecipheriv(
-        "aes-256-cbc",
-        Buffer.from(
-          process.env.SECRET_KEY ||
-            "ac705c3be4ac88a1b6e27dbb46554eb801d1979b0583bdbb7acaf82aa9da192d",
-          "hex"
-        ),
-        iv
-      );
-      let decrypted = decipher.update(encrypted, "hex", "utf8");
-      decrypted += decipher.final("utf8");
-      return decrypted;
-    } catch (error) {
-      console.error("Decryption failed:", error);
-      throw error; // Rethrow the error after logging
-    }
-  }
-  const decryptedPassword = decrypt(passwordDetails?.password);
-
+const EditDialog = ({
+  passwordDetails,
+  decryptedPassword,
+}: {
+  passwordDetails: any;
+  decryptedPassword: string;
+}) => {
   const [title, setTitle] = useState(passwordDetails.title);
   const [username, setUsername] = useState(passwordDetails.userName);
   const [email, setEmail] = useState(passwordDetails.email);
   const [notes, setNotes] = useState(passwordDetails.notes);
   const [url, setUrl] = useState(passwordDetails.url);
   const [category, setCategory] = useState(passwordDetails.category);
+  const [tagsInput, setTagsInput] = useState(passwordDetails.tags?.join(", ") || "");
+  const [tags, setTags] = useState<string[]>(passwordDetails.tags || []);
   const [loading, setLoading] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState(
     decryptedPassword || "error"
@@ -99,6 +84,7 @@ const EditDialog = ({ passwordDetails }: any) => {
       email,
       notes,
       url,
+      tags,
     };
 
     try {
@@ -203,6 +189,7 @@ const EditDialog = ({ passwordDetails }: any) => {
                   <Sparkles size={20} />
                 </Button>
               </div>
+              <PasswordStrengthMeter password={generatedPassword} />
               <div>
                 <Label htmlFor="length">
                   Length{" "}
@@ -287,6 +274,33 @@ const EditDialog = ({ passwordDetails }: any) => {
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="Add URL.."
                 />
+              </div>
+              <div>
+                <Label htmlFor="tags">Tags (comma separated)</Label>
+                <Input
+                  id="tags"
+                  value={tagsInput}
+                  onChange={(e) => {
+                    setTagsInput(e.target.value);
+                    setTags(
+                      e.target.value
+                        .split(",")
+                        .map((tag) => tag.trim())
+                        .filter((tag) => tag !== "")
+                    );
+                  }}
+                  placeholder="e.g. Work, Personal, Social"
+                />
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {tags.map((tag: string) => (
+                    <span
+                      key={tag}
+                      className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
