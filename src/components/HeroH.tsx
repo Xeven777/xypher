@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export function HeroHighlightDemo() {
   return (
-    <HeroHighlight>
+    <HeroHighlight className="min-h-svh">
       <button
         type="button"
         className="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-xs font-semibold leading-6 inline-block transition-all hover:scale-105 active:scale-100"
