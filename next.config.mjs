@@ -12,9 +12,7 @@ const nextConfig = {
             },
         ],
     },
-    experimental: {
-        reactCompiler: true,
-    },
+    reactCompiler: true,
     env: {
         KINDE_SITE_URL:
             process.env.KINDE_SITE_URL ?? `https://${process.env.VERCEL_URL}`,
