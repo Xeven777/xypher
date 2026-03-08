@@ -1,8 +1,10 @@
 import { decrypt } from "@/actions/cipher";
-import { passwordById } from "@/actions/prisma";
+import { passwordById, toggleFavorite } from "@/actions/prisma";
 import CopyComp from "@/components/copyComp";
 import EditDialog from "@/components/editDialog";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
+import { Star } from "lucide-react";
+import FavoriteButton from "@/components/FavoriteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +27,19 @@ const page = async ({
   return (
     <div className="container mt-16 flex flex-col max-w-5xl">
       <div className="flex items-center pr-2 md:pr-10 justify-between my-4">
-        <h1 className="text-3xl md:text-5xl py-2 px-1 font-semibold flex-1">
-          {res.title}
-        </h1>
-        <EditDialog passwordDetails={res} />
+        <div className="flex items-center gap-4 flex-1">
+          <h1 className="text-3xl md:text-5xl py-2 px-1 font-semibold">
+            {res.title}
+          </h1>
+          <FavoriteButton
+            id={res.id}
+            isFavorite={res.isFavorite}
+          />
+        </div>
+        <EditDialog
+          passwordDetails={res}
+          decryptedPassword={decryptedPassword}
+        />
       </div>
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         <p className="p-4 border rounded flex hover:shadow-md hover:shadow-primary/40 transition-all duration-300">
@@ -52,6 +63,21 @@ const page = async ({
           <span className="text-muted-foreground pr-2">URL:</span>{" "}
           {res.url || "..."}
         </p>
+        <div className="p-4 border rounded flex hover:shadow-md hover:shadow-primary/40 transition-all duration-300 gap-2 flex-wrap">
+          <span className="text-muted-foreground pr-2">Tags:</span>{" "}
+          {res.tags && res.tags.length > 0 ? (
+            res.tags.map((tag: string) => (
+              <span
+                key={tag}
+                className="bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded"
+              >
+                {tag}
+              </span>
+            ))
+          ) : (
+            "..."
+          )}
+        </div>
       </div>
     </div>
   );

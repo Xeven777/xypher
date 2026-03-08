@@ -37,6 +37,7 @@ import {
   Plus,
   SearchIcon,
   Sparkles,
+  Star,
   TrashIcon,
 } from "lucide-react";
 import {
@@ -57,9 +58,16 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { addPassword, deletePassword, fetchPasswords } from "@/actions/prisma";
+import {
+  addPassword,
+  deletePassword,
+  fetchPasswords,
+  toggleFavorite,
+} from "@/actions/prisma";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
+import { PasswordStrengthMeter } from "@/components/PasswordStrengthMeter";
+import ImportExportButtons from "@/components/ImportExportButtons";
 type PasswordKey =
   | "id"
   | "userId"
@@ -70,7 +78,9 @@ type PasswordKey =
   | "userName"
   | "url"
   | "notes"
-  | "email";
+  | "email"
+  | "isFavorite"
+  | "tags";
 type Password = {
   id: string;
   userId: string;
@@ -82,6 +92,8 @@ type Password = {
   url: string | null;
   notes: string | null;
   email: string | null;
+  isFavorite: boolean;
+  tags: string[];
 };
 
 export default function Component() {
@@ -103,6 +115,8 @@ export default function Component() {
   const [sortOrder, setSortOrder] = useState("asc");
   const router = useRouter();
   const [generatedPassword, setGeneratedPassword] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -120,14 +134,26 @@ export default function Component() {
 
   const filteredPasswords = useMemo(() => {
     return passwords
-      .filter((password) =>
-        password?.title.toLowerCase().includes(searchTerm.toLowerCase())
+      .filter(
+        (password) =>
+          password?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          password?.tags?.some((tag) =>
+            tag.toLowerCase().includes(searchTerm.toLowerCase()),
+          ),
       )
       .sort((a, b) => {
-        // @ts-expect-error
-        if (a![sortBy] < b![sortBy]) return sortOrder === "asc" ? -1 : 1;
-        // @ts-expect-error
-        if (a![sortBy] > b![sortBy]) return sortOrder === "asc" ? 1 : -1;
+        if (a.isFavorite !== b.isFavorite) {
+          return a.isFavorite ? -1 : 1;
+        }
+
+        const aVal = a[sortBy];
+        const bVal = b[sortBy];
+
+        if (aVal === null || aVal === undefined) return 1;
+        if (bVal === null || bVal === undefined) return -1;
+
+        if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
         return 0;
       });
   }, [passwords, searchTerm, sortBy, sortOrder]);
@@ -157,6 +183,7 @@ export default function Component() {
         email: email,
         notes: notes,
         url: url,
+        tags: tags,
       }).then((result) => {
         if (result) {
           setPasswords([
@@ -172,6 +199,8 @@ export default function Component() {
               id: result.id,
               userId: result.userId,
               createdAt: result.createdAt,
+              isFavorite: result.isFavorite,
+              tags: result.tags,
             },
           ]);
           setTitle("");
@@ -181,6 +210,8 @@ export default function Component() {
           setEmail("");
           setNotes("");
           setUrl("");
+          setTags([]);
+          setTagsInput("");
           toast.success("Password saved successfully");
           setLoading(false);
         }
@@ -193,12 +224,37 @@ export default function Component() {
   };
 
   const deletePw = async (id: string) => {
-    const res = await deletePassword(id);
-    if (res) {
-      toast.success("Password deleted successfully");
-      setPasswords(passwords.filter((p) => p.id !== id));
-    } else {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this password? This action cannot be undone.",
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await deletePassword(id);
+      if (res) {
+        toast.success("Password deleted successfully");
+        setPasswords(passwords.filter((p) => p.id !== id));
+      } else {
+        toast.error("Failed to delete password");
+      }
+    } catch (e) {
       toast.error("Failed to delete password");
+    }
+  };
+
+  const onToggleFavorite = async (id: string, currentFavorite: boolean) => {
+    const res = await toggleFavorite(id, currentFavorite);
+    if (res) {
+      setPasswords(
+        passwords.map((p) =>
+          p.id === id ? { ...p, isFavorite: !currentFavorite } : p,
+        ),
+      );
+      toast.success(
+        currentFavorite ? "Removed from favorites" : "Added to favorites",
+      );
+    } else {
+      toast.error("Failed to update favorite");
     }
   };
 
@@ -216,7 +272,8 @@ export default function Component() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <ImportExportButtons passwords={passwords} />
             <Dialog>
               <Button asChild>
                 <DialogTrigger>
@@ -301,6 +358,7 @@ export default function Component() {
                           <Sparkles size={20} />
                         </Button>
                       </div>
+                      <PasswordStrengthMeter password={generatedPassword} />
                       <div>
                         <Label htmlFor="length">
                           Length{" "}
@@ -387,6 +445,30 @@ export default function Component() {
                         />
                       </div>
                       <div>
+                        <Label htmlFor="tags">Tags (comma separated)</Label>
+                        <Input
+                          id="tags"
+                          value={tagsInput}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setTagsInput(val);
+                            const rawTags = val
+                              .split(",")
+                              .map((tag) => tag.trim())
+                              .filter((tag) => tag !== "" && tag.length <= 50);
+                            setTags(rawTags.slice(0, 10));
+                          }}
+                          placeholder="e.g. Work, Personal, Social"
+                        />
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {tags.map((tag) => (
+                            <Badge key={tag} variant="secondary">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
                         <Label htmlFor="category">Category</Label>
                         <Select
                           onValueChange={setCategory}
@@ -451,6 +533,7 @@ export default function Component() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-[50px]"></TableHead>
                       <TableHead
                         className="cursor-pointer"
                         onClick={() => {
@@ -502,6 +585,24 @@ export default function Component() {
                   <TableBody>
                     {filteredPasswords.map((password) => (
                       <TableRow key={password.id}>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              onToggleFavorite(password.id, password.isFavorite)
+                            }
+                          >
+                            <Star
+                              size={18}
+                              className={
+                                password.isFavorite
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-muted-foreground"
+                              }
+                            />
+                          </Button>
+                        </TableCell>
                         <TableCell
                           className="font-medium cursor-pointer"
                           onClick={() => {
@@ -530,9 +631,7 @@ export default function Component() {
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger>
-                              <Button variant={"secondary"} size={"icon"}>
-                                <Ellipsis />
-                              </Button>
+                              <Ellipsis />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                               <DropdownMenuLabel>Options</DropdownMenuLabel>
