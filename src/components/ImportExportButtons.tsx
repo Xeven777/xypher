@@ -10,7 +10,14 @@ import { z } from "zod";
 const PasswordImportSchema = z.object({
   title: z.string().min(1).max(255),
   username: z.string().max(255).optional().or(z.literal("")),
-  password: z.string().min(1).max(256),
+  password: z
+    .string()
+    .min(8)
+    .max(256)
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain uppercase, lowercase, and numbers",
+    ),
   category: z.enum([
     "Login",
     "Education",
@@ -43,7 +50,7 @@ export default function ImportExportButtons({
 
   const exportToJson = async () => {
     const confirmed = window.confirm(
-      "WARNING: This will export ALL your passwords in UNENCRYPTED plaintext. Ensure you are on a private device and delete the file after use. Do you want to continue?"
+      "WARNING: This will export ALL your passwords in UNENCRYPTED plaintext. Ensure you are on a private device and delete the file after use. Do you want to continue?",
     );
     if (!confirmed) return;
 
@@ -57,7 +64,7 @@ export default function ImportExportButtons({
 
       // Remove sensitive DB fields before export
       const exportData = decryptedPasswords.map(
-        ({ id, userId, createdAt, ...rest }) => rest
+        ({ id, userId, createdAt, ...rest }) => rest,
       );
 
       const dataStr = JSON.stringify(exportData, null, 2);
@@ -126,7 +133,7 @@ export default function ImportExportButtons({
 
         if (failCount > 0) {
           toast.warning(
-            `Imported ${successCount} passwords. ${failCount} rows failed validation.`
+            `Imported ${successCount} passwords. ${failCount} rows failed validation.`,
           );
         } else {
           toast.success(`Imported ${successCount} passwords successfully`);
@@ -135,7 +142,9 @@ export default function ImportExportButtons({
         window.location.reload(); // Refresh to see new passwords
       } catch (error) {
         console.error("Import failed:", error);
-        toast.error("Failed to import passwords. Ensure CSV format is correct.");
+        toast.error(
+          "Failed to import passwords. Ensure CSV format is correct.",
+        );
       } finally {
         setImporting(false);
       }

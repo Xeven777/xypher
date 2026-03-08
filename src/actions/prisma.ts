@@ -5,9 +5,28 @@ import prisma from "@/lib/db/prisma";
 import { revalidatePath } from "next/cache";
 import { encrypt, decrypt } from "./cipher";
 
+// Validate password strength and length
+const validatePassword = (password: string) => {
+  if (password.length < 8) {
+    throw new Error("Password must be at least 8 characters long");
+  }
+  if (password.length > 256) {
+    throw new Error("Password must not exceed 256 characters");
+  }
+  // Check for at least one uppercase, one lowercase, and one number
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  if (!hasUppercase || !hasLowercase || !hasNumber) {
+    throw new Error(
+      "Password must contain uppercase letters, lowercase letters, and numbers",
+    );
+  }
+};
+
 export const addPassword = async (passwordData: {
   title: string;
-  username: string;
+  username?: string;
   password: string;
   category: string;
   email?: string;
@@ -23,6 +42,7 @@ export const addPassword = async (passwordData: {
   }
 
   try {
+    validatePassword(passwordData.password);
     const encryptedPassword = encrypt(passwordData.password);
     const result = await prisma.passwords.create({
       data: {
@@ -115,7 +135,7 @@ export const deletePassword = async (passwordId: string) => {
 export const updatePassword = async (passwordData: {
   id: string;
   title: string;
-  username: string;
+  username?: string;
   password: string;
   category: string;
   email?: string;
@@ -139,6 +159,7 @@ export const updatePassword = async (passwordData: {
       throw new Error("Not found or unauthorized");
     }
 
+    validatePassword(passwordData.password);
     const encryptedPassword = encrypt(passwordData.password);
     const result = await prisma.passwords.update({
       where: {
@@ -167,7 +188,7 @@ export const updatePassword = async (passwordData: {
 
 export const toggleFavorite = async (
   passwordId: string,
-  isFavorite: boolean
+  isFavorite: boolean,
 ) => {
   const { getUser } = getKindeServerSession();
   const user = await getUser();

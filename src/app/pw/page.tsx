@@ -138,8 +138,8 @@ export default function Component() {
         (password) =>
           password?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           password?.tags?.some((tag) =>
-            tag.toLowerCase().includes(searchTerm.toLowerCase())
-          )
+            tag.toLowerCase().includes(searchTerm.toLowerCase()),
+          ),
       )
       .sort((a, b) => {
         if (a.isFavorite !== b.isFavorite) {
@@ -225,7 +225,7 @@ export default function Component() {
 
   const deletePw = async (id: string) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this password? This action cannot be undone."
+      "Are you sure you want to delete this password? This action cannot be undone.",
     );
     if (!confirmed) return;
 
@@ -246,10 +246,12 @@ export default function Component() {
     const res = await toggleFavorite(id, currentFavorite);
     if (res) {
       setPasswords(
-        passwords.map((p) => (p.id === id ? { ...p, isFavorite: !currentFavorite } : p))
+        passwords.map((p) =>
+          p.id === id ? { ...p, isFavorite: !currentFavorite } : p,
+        ),
       );
       toast.success(
-        currentFavorite ? "Removed from favorites" : "Added to favorites"
+        currentFavorite ? "Removed from favorites" : "Added to favorites",
       );
     } else {
       toast.error("Failed to update favorite");
@@ -453,9 +455,7 @@ export default function Component() {
                             const rawTags = val
                               .split(",")
                               .map((tag) => tag.trim())
-                              .filter(
-                                (tag) => tag !== "" && tag.length <= 50
-                              );
+                              .filter((tag) => tag !== "" && tag.length <= 50);
                             setTags(rawTags.slice(0, 10));
                           }}
                           placeholder="e.g. Work, Personal, Social"
@@ -631,9 +631,7 @@ export default function Component() {
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger>
-                              <Button variant={"secondary"} size={"icon"}>
-                                <Ellipsis />
-                              </Button>
+                              <Ellipsis />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                               <DropdownMenuLabel>Options</DropdownMenuLabel>
