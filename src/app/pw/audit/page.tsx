@@ -12,18 +12,39 @@ export default async function AuditPage() {
 
   if (!passwords) return <div className="p-10">Loading...</div>;
 
+  // Pre-decrypt all passwords once to avoid O(n^2) decryption operations
   const auditedPasswords = passwords.map((p) => {
-    const decrypted = decrypt(p.password);
-    const strength = zxcvbn(decrypted);
-    return {
-      ...p,
-      score: strength.score, // 0-4
-      isReused: passwords.filter((other) => other.id !== p.id && decrypt(other.password) === decrypted).length > 0,
-    };
+    try {
+        const decrypted = decrypt(p.password);
+        const strength = zxcvbn(decrypted);
+        return {
+          ...p,
+          decrypted,
+          score: strength.score, // 0-4
+        };
+    } catch (e) {
+        return {
+            ...p,
+            decrypted: null,
+            score: 0,
+            error: true
+        }
+    }
   });
 
-  const weakPasswords = auditedPasswords.filter((p) => p.score <= 2);
-  const reusedPasswords = auditedPasswords.filter((p) => p.isReused);
+  // Check for reused passwords using the pre-decrypted values
+  const auditedWithReuse = auditedPasswords.map((p) => {
+      if (!p.decrypted) return { ...p, isReused: false };
+
+      const isReused = auditedPasswords.some(
+          (other) => other.id !== p.id && other.decrypted === p.decrypted
+      );
+
+      return { ...p, isReused };
+  });
+
+  const weakPasswords = auditedWithReuse.filter((p) => p.score <= 2);
+  const reusedPasswords = auditedWithReuse.filter((p) => p.isReused);
 
   return (
     <div className="container mt-20 max-w-5xl mx-auto p-4">
@@ -47,7 +68,7 @@ export default async function AuditPage() {
             <ShieldCheck className="text-green-500" /> Secure
           </h3>
           <p className="text-3xl font-bold mt-2">
-            {auditedPasswords.length - weakPasswords.length - reusedPasswords.length}
+            {auditedWithReuse.length - weakPasswords.length - reusedPasswords.length}
           </p>
         </div>
       </div>

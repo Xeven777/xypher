@@ -5,6 +5,32 @@ import { Download, Upload, Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { addPassword, fetchDecryptedPasswords } from "@/actions/prisma";
+import { z } from "zod";
+
+const PasswordImportSchema = z.object({
+  title: z.string().min(1).max(255),
+  username: z.string().max(255).optional().or(z.literal("")),
+  password: z.string().min(1).max(256),
+  category: z.enum([
+    "Login",
+    "Education",
+    "Software",
+    "Finance",
+    "Shopping",
+    "Email",
+    "Entertainment",
+    "Social",
+    "Other",
+  ]),
+  email: z
+    .string()
+    .email()
+    .optional()
+    .or(z.literal(""))
+    .or(z.string().length(0)),
+  url: z.string().url().optional().or(z.literal("")),
+  notes: z.string().max(5000).optional().or(z.literal("")),
+});
 
 export default function ImportExportButtons({
   passwords,
@@ -16,6 +42,11 @@ export default function ImportExportButtons({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const exportToJson = async () => {
+    const confirmed = window.confirm(
+      "WARNING: This will export ALL your passwords in UNENCRYPTED plaintext. Ensure you are on a private device and delete the file after use. Do you want to continue?"
+    );
+    if (!confirmed) return;
+
     setExporting(true);
     try {
       const decryptedPasswords = await fetchDecryptedPasswords();
@@ -33,7 +64,7 @@ export default function ImportExportButtons({
       const dataUri =
         "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
 
-      const exportFileDefaultName = "xypher_passwords.json";
+      const exportFileDefaultName = "xypher_passwords_UNENCRYPTED.json";
 
       const linkElement = document.createElement("a");
       linkElement.setAttribute("href", dataUri);
@@ -71,22 +102,36 @@ export default function ImportExportButtons({
         });
 
         let successCount = 0;
+        let failCount = 0;
         for (const item of importedData) {
-          if (item.title && item.password && (item.username || item.email)) {
-             await addPassword({
-              title: item.title,
+          try {
+            // Basic sanitization: Ensure required fields have at least empty strings if missing
+            const sanitizedItem = {
+              ...item,
               username: item.username || "",
-              password: item.password,
               category: item.category || "Login",
               email: item.email || "",
               url: item.url || "",
               notes: item.notes || "",
-            });
+            };
+
+            const validated = PasswordImportSchema.parse(sanitizedItem);
+            await addPassword(validated);
             successCount++;
+          } catch (error) {
+            console.error("Row validation failed:", error);
+            failCount++;
           }
         }
 
-        toast.success(`Imported ${successCount} passwords successfully`);
+        if (failCount > 0) {
+          toast.warning(
+            `Imported ${successCount} passwords. ${failCount} rows failed validation.`
+          );
+        } else {
+          toast.success(`Imported ${successCount} passwords successfully`);
+        }
+
         window.location.reload(); // Refresh to see new passwords
       } catch (error) {
         console.error("Import failed:", error);

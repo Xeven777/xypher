@@ -281,13 +281,13 @@ const EditDialog = ({
                   id="tags"
                   value={tagsInput}
                   onChange={(e) => {
-                    setTagsInput(e.target.value);
-                    setTags(
-                      e.target.value
-                        .split(",")
-                        .map((tag) => tag.trim())
-                        .filter((tag) => tag !== "")
-                    );
+                    const val = e.target.value;
+                    setTagsInput(val);
+                    const rawTags = val
+                      .split(",")
+                      .map((tag) => tag.trim())
+                      .filter((tag) => tag !== "" && tag.length <= 50);
+                    setTags(rawTags.slice(0, 10));
                   }}
                   placeholder="e.g. Work, Personal, Social"
                 />

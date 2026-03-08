@@ -145,10 +145,15 @@ export default function Component() {
         if (a.isFavorite !== b.isFavorite) {
           return a.isFavorite ? -1 : 1;
         }
-        // @ts-expect-error
-        if (a![sortBy] < b![sortBy]) return sortOrder === "asc" ? -1 : 1;
-        // @ts-expect-error
-        if (a![sortBy] > b![sortBy]) return sortOrder === "asc" ? 1 : -1;
+
+        const aVal = a[sortBy];
+        const bVal = b[sortBy];
+
+        if (aVal === null || aVal === undefined) return 1;
+        if (bVal === null || bVal === undefined) return -1;
+
+        if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
         return 0;
       });
   }, [passwords, searchTerm, sortBy, sortOrder]);
@@ -219,11 +224,20 @@ export default function Component() {
   };
 
   const deletePw = async (id: string) => {
-    const res = await deletePassword(id);
-    if (res) {
-      toast.success("Password deleted successfully");
-      setPasswords(passwords.filter((p) => p.id !== id));
-    } else {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this password? This action cannot be undone."
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await deletePassword(id);
+      if (res) {
+        toast.success("Password deleted successfully");
+        setPasswords(passwords.filter((p) => p.id !== id));
+      } else {
+        toast.error("Failed to delete password");
+      }
+    } catch (e) {
       toast.error("Failed to delete password");
     }
   };
@@ -434,13 +448,15 @@ export default function Component() {
                           id="tags"
                           value={tagsInput}
                           onChange={(e) => {
-                            setTagsInput(e.target.value);
-                            setTags(
-                              e.target.value
-                                .split(",")
-                                .map((tag) => tag.trim())
-                                .filter((tag) => tag !== "")
-                            );
+                            const val = e.target.value;
+                            setTagsInput(val);
+                            const rawTags = val
+                              .split(",")
+                              .map((tag) => tag.trim())
+                              .filter(
+                                (tag) => tag !== "" && tag.length <= 50
+                              );
+                            setTags(rawTags.slice(0, 10));
                           }}
                           placeholder="e.g. Work, Personal, Social"
                         />
