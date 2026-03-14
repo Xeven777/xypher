@@ -18,14 +18,7 @@ import {
 const PasswordImportSchema = z.object({
   title: z.string().min(1).max(255),
   username: z.string().max(255).optional().or(z.literal("")),
-  password: z
-    .string()
-    .min(8)
-    .max(256)
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain uppercase, lowercase, and numbers",
-    ),
+  password: z.string().min(6).max(256),
   category: z.enum([
     "Login",
     "Education",
@@ -242,9 +235,12 @@ export default function ImportExportButtons({
               <DialogDescription>
                 Upload a CSV with a header row. Expected columns
                 (case-insensitive):
-                <pre className="mt-2 rounded bg-muted p-2 text-sm">
+                <pre className="my-2 rounded bg-muted p-2 text-sm">
                   Title,Username,Password,Category,Email,URL,Notes
                 </pre>
+                Passwords must be at least 6 characters. Category is optional
+                (defaults to "Login"). Email, URL, and Notes are optional.
+                Ensure your CSV is properly formatted before uploading.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="mt-2 flex gap-2">
