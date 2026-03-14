@@ -261,7 +261,7 @@ export default function Component() {
   return (
     <div className="flex max-w-6xl mx-auto flex-col mt-14">
       <main className="flex-1 bg-background p-6">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2 mb-4">
           <div className="relative w-full max-w-md">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -272,13 +272,16 @@ export default function Component() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex gap-2 items-center">
-            <ImportExportButtons passwords={passwords} />
+          <div className="flex gap-2 items-center flex-wrap">
+            <div className="shrink-0">
+              <ImportExportButtons passwords={passwords} />
+            </div>
             <Dialog>
-              <Button asChild>
+              <Button asChild className="flex items-center text-xs sm:text-sm">
                 <DialogTrigger>
-                  <Plus size={18} className="mr-2" />
-                  Add Password
+                  <Plus className="mr-1 md:mr-2 size-4 sm:size-5" />
+                  Add
+                  <span className="hidden sm:inline"> Password</span>
                 </DialogTrigger>
               </Button>
               <DialogContent className="bg-background px-4 py-6 rounded-md shadow-lg">

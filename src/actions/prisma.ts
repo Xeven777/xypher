@@ -6,23 +6,23 @@ import { revalidatePath } from "next/cache";
 import { encrypt, decrypt } from "./cipher";
 
 // Validate password strength and length
-const validatePassword = (password: string) => {
-  if (password.length < 8) {
-    throw new Error("Password must be at least 8 characters long");
-  }
-  if (password.length > 256) {
-    throw new Error("Password must not exceed 256 characters");
-  }
-  // Check for at least one uppercase, one lowercase, and one number
-  const hasUppercase = /[A-Z]/.test(password);
-  const hasLowercase = /[a-z]/.test(password);
-  const hasNumber = /\d/.test(password);
-  if (!hasUppercase || !hasLowercase || !hasNumber) {
-    throw new Error(
-      "Password must contain uppercase letters, lowercase letters, and numbers",
-    );
-  }
-};
+// const validatePassword = (password: string) => {
+//   if (password.length < 8) {
+//     throw new Error("Password must be at least 8 characters long");
+//   }
+//   if (password.length > 256) {
+//     throw new Error("Password must not exceed 256 characters");
+//   }
+//   // Check for at least one uppercase, one lowercase, and one number
+//   const hasUppercase = /[A-Z]/.test(password);
+//   const hasLowercase = /[a-z]/.test(password);
+//   const hasNumber = /\d/.test(password);
+//   if (!hasUppercase || !hasLowercase || !hasNumber) {
+//     throw new Error(
+//       "Password must contain uppercase letters, lowercase letters, and numbers",
+//     );
+//   }
+// };
 
 export const addPassword = async (passwordData: {
   title: string;
@@ -42,7 +42,7 @@ export const addPassword = async (passwordData: {
   }
 
   try {
-    validatePassword(passwordData.password);
+    // validatePassword(passwordData.password);
     const encryptedPassword = encrypt(passwordData.password);
     const result = await prisma.passwords.create({
       data: {
@@ -159,7 +159,7 @@ export const updatePassword = async (passwordData: {
       throw new Error("Not found or unauthorized");
     }
 
-    validatePassword(passwordData.password);
+    // validatePassword(passwordData.password);
     const encryptedPassword = encrypt(passwordData.password);
     const result = await prisma.passwords.update({
       where: {

@@ -157,6 +157,7 @@ export default function ImportExportButtons({
       <Button
         variant="outline"
         size="sm"
+        className="text-xs md:text-sm"
         onClick={exportToJson}
         disabled={exporting}
       >
@@ -165,7 +166,8 @@ export default function ImportExportButtons({
         ) : (
           <Download size={16} className="mr-2" />
         )}
-        Export JSON
+        Export
+        <span className="hidden sm:inline">JSON</span>
       </Button>
       <div className="relative">
         <input
@@ -178,6 +180,7 @@ export default function ImportExportButtons({
         <Button
           variant="outline"
           size="sm"
+          className="text-xs md:text-sm"
           onClick={() => fileInputRef.current?.click()}
           disabled={importing}
         >
@@ -186,7 +189,8 @@ export default function ImportExportButtons({
           ) : (
             <Upload size={16} className="mr-2" />
           )}
-          Import CSV
+          Import
+          <span className="hidden sm:inline">CSV</span>
         </Button>
       </div>
     </div>
