@@ -6,6 +6,14 @@ import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { addPassword, fetchDecryptedPasswords } from "@/actions/prisma";
 import { z } from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const PasswordImportSchema = z.object({
   title: z.string().min(1).max(255),
@@ -46,14 +54,12 @@ export default function ImportExportButtons({
 }) {
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const exportToJson = async () => {
-    const confirmed = window.confirm(
-      "WARNING: This will export ALL your passwords in UNENCRYPTED plaintext. Ensure you are on a private device and delete the file after use. Do you want to continue?",
-    );
-    if (!confirmed) return;
-
+  const performExport = async () => {
+    setIsExportDialogOpen(false);
     setExporting(true);
     try {
       const decryptedPasswords = await fetchDecryptedPasswords();
@@ -152,47 +158,109 @@ export default function ImportExportButtons({
     reader.readAsText(file);
   };
 
+  const openFileDialog = () => {
+    setIsImportDialogOpen(false);
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="flex gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        className="text-xs md:text-sm"
-        onClick={exportToJson}
-        disabled={exporting}
-      >
-        {exporting ? (
-          <Loader2 size={16} className="mr-2 animate-spin" />
-        ) : (
-          <Download size={16} className="mr-2" />
-        )}
-        Export
-        <span className="hidden sm:inline">JSON</span>
-      </Button>
-      <div className="relative">
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleImport}
-          accept=".csv"
-          className="hidden"
-        />
+      <>
         <Button
           variant="outline"
           size="sm"
           className="text-xs md:text-sm"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={importing}
+          onClick={() => setIsExportDialogOpen(true)}
+          disabled={exporting}
         >
-          {importing ? (
+          {exporting ? (
             <Loader2 size={16} className="mr-2 animate-spin" />
           ) : (
-            <Upload size={16} className="mr-2" />
+            <Download size={16} className="mr-2" />
           )}
-          Import
-          <span className="hidden sm:inline">CSV</span>
+          Export
+          <span className="hidden sm:inline">JSON</span>
         </Button>
-      </div>
+
+        <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export all passwords (UNENCRYPTED)</DialogTitle>
+              <DialogDescription>
+                This will export ALL your passwords in UNENCRYPTED plaintext. Do
+                not proceed on a public or shared device. The downloaded file
+                will be named <strong>xypher_passwords_UNENCRYPTED.json</strong>
+                .
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-2 flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsExportDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={performExport} disabled={exporting}>
+                {exporting ? (
+                  <Loader2 size={16} className="mr-2 animate-spin" />
+                ) : (
+                  "Export"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <div className="relative">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImport}
+            accept=".csv"
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs md:text-sm"
+            onClick={() => setIsImportDialogOpen(true)}
+            disabled={importing}
+          >
+            {importing ? (
+              <Loader2 size={16} className="mr-2 animate-spin" />
+            ) : (
+              <Upload size={16} className="mr-2" />
+            )}
+            Import
+            <span className="hidden sm:inline">CSV</span>
+          </Button>
+        </div>
+        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Import CSV format</DialogTitle>
+              <DialogDescription>
+                Upload a CSV with a header row. Expected columns
+                (case-insensitive):
+                <pre className="mt-2 rounded bg-muted p-2 text-sm">
+                  Title,Username,Password,Category,Email,URL,Notes
+                </pre>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-2 flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsImportDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={openFileDialog} disabled={importing}>
+                Continue to upload
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     </div>
   );
 }
